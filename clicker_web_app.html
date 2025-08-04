@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clicker App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Venue Exit Clicker</h2>
+
+        <div class="status">
+            <p><strong>Venue Status:</strong> <span id="venueStatus">Loading...</span></p>
+            <p><strong>Guests in Venue:</strong> <span id="guestsInVenue">0</span></p>
+        </div>
+
+        <button onclick="decrementVenue()">Guest Left Venue</button>
+    </div>
+
+    <script>
+        async function fetchVenueStatus() {
+            const res = await fetch('/status');
+            const data = await res.json();
+            const isFull = data.guests_in_venue >= data.venue_capacity;
+            document.getElementById('venueStatus').textContent = isFull ? 'Full' : 'Available';
+            document.getElementById('guestsInVenue').textContent = data.guests_in_venue;
+        }
+
+        async function decrementVenue() {
+            const res = await fetch('/decrement-venue', { method: 'POST' });
+            if (res.ok) {
+                fetchVenueStatus();
+            } else {
+                const error = await res.json();
+                alert(error.detail || "Error updating venue count.");
+            }
+        }
+
+        fetchVenueStatus();
+        setInterval(fetchVenueStatus, 5000);
+    </script>
+</body>
+</html>

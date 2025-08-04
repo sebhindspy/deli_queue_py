@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Team Member App</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+</head>
+
+<body>
+    <div class="info">
+        <h1>Team Member App</h1>
+
+        <div id="reader"></div>
+        <div id="result"></div>
+
+        <div class="status">
+            <p><strong>Venue Status:</strong> <span id="venueStatus">Loading...</span></p>
+            <p><strong>Queue status:</strong> <span id="queueStatus">Loading...</span></p>
+            <p><strong>Guests in queue:</strong> <span id="guestCount">0</span></p>
+            <p><strong>Next guest:</strong> <span id="nextGuest">Loading..</span><span id="premiumBadge"></span></p>
+        </div>
+
+        <button id="advanceBtn" onclick="advanceQueue()">Remove guest from queue</button>
+    </div>
+    <script>
+        async function fetchStatus() {
+            try {
+                const response = await fetch('/status');
+                const data = await response.json();
+
+                document.getElementById('guestCount').textContent = data.queue.length;
+
+                const isFull = data.venue_mode_enabled && data.guests_in_venue >= data.venue_capacity;
+                document.getElementById('venueStatus').textContent = isFull ? 'Full' : 'Available';
+
+                const advanceBtn = document.getElementById('advanceBtn');
+
+                if (data.queue.length > 0 && !isFull) {
+                    const nextGuest = data.queue[0];
+                    const email = typeof nextGuest === 'object' && nextGuest.email ? nextGuest.email : String(nextGuest);
+                    const isPremium = typeof nextGuest === 'object' && nextGuest.premium;
+
+                    document.getElementById('nextGuest').textContent = email;
+                    document.getElementById('premiumBadge').textContent = isPremium ? 'Premium' : '';
+                    document.getElementById('premiumBadge').className = isPremium ? 'premium-badge' : '';
+                    advanceBtn.disabled = false;
+                } else {
+                    document.getElementById('nextGuest').textContent = 'None';
+                    document.getElementById('premiumBadge').textContent = '';
+                    document.getElementById('premiumBadge').className = '';
+                    advanceBtn.disabled = true;
+                }
+            } catch (error) {
+                console.error('Error fetching status:', error);
+            }
+        }
+
+
+
+        async function advanceQueue() {
+            try {
+                const response = await fetch('/advance', { method: 'POST' });
+                if (response.ok) {
+                    fetchStatus();
+                } else {
+                    const error = await response.json();
+                    alert(error.detail || "Failed to advance queue.");
+                }
+            } catch (error) {
+                console.error('Error advancing queue:', error);
+            }
+        }
+
+        fetchStatus();
+        setInterval(fetchStatus, 5000);
+
+        async function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById("result").innerText = `Scanned Email: ${decodedText}`;
+
+            try {
+                const response = await fetch("/advance", { method: "POST" });
+                if (response.ok) {
+                    document.getElementById("result").innerText = "Reservation completed";
+                } else {
+                    const error = await response.json();
+                    alert(error.detail || "Failed to advance queue.");
+                }
+            } catch (err) {
+                console.error("Error advancing queue:", err);
+                alert("An error occurred while processing the scan.");
+            }
+
+            setTimeout(() => {
+                document.getElementById("result").innerText = "";
+            }, 2000);
+
+            html5QrcodeScanner.clear();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+            scanner.render(onScanSuccess);
+        });
+
+
+    </script>
+</body>
+
+</html>

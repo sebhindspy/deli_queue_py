@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Control Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2>Admin Control Panel</h2>
+        <div class="status">
+            <p><strong>Queue status:</strong> <span id="queueStatus">Loading...</span></p>
+            <p><strong>Guests in queue:</strong> <span id="guestCount">0</span></p>
+            <p><strong>Guests in Venue:</strong> <span id="guestsInVenue">Loading...</span></p>
+            <p><strong>Premium limit:</strong> <span id="premiumLimit">Loading...</span></p>
+            <p><strong>One Shot price:</strong> $<span id="oneShotPrice">Loading...</span></p>
+        </div>
+        <button onclick="openQueue()">Open Queue</button>
+        <button onclick="closeQueue()">Close Queue</button>
+        <button onclick="resetQueue()">Reset Queue</button>
+
+        <hr>
+
+        <h3>Demo mode</h3>
+
+        <input type="number" id="mockCount" placeholder="Number of mock guests">
+        <button onclick="mockGuests()">Insert Mock Guests</button>
+
+        <hr>
+
+        <h3>Premium access</h3>
+
+        <input type="number" id="premiumLimitInput" placeholder="Set Premium Limit">
+        <button onclick="setPremiumLimit()">Update Premium Limit</button>
+
+        <input type="number" id="oneShotPriceInput" placeholder="Set One Shot Price ($)">
+        <button onclick="setOneShotPrice()">Update One Shot Price</button>
+
+        <hr>
+
+        <h3>Venue Management</h3>
+
+        <label>
+            <input type="checkbox" id="venueModeToggle" onchange="toggleVenueMode()">
+            Enable Venue Mode
+        </label>
+
+        <br><br>
+
+        <input type="number" id="venueCapacityInput" placeholder="Set Venue Capacity">
+        <button onclick="setVenueCapacity()">Update Venue Capacity</button>
+
+    </div>
+
+    <script>
+        async function fetchStatus() {
+            const res = await fetch('/status');
+            const data = await res.json();
+            console.log(data); // for debug
+            document.getElementById('queueStatus').textContent = data.is_open ? 'Open' : 'Closed';
+            document.getElementById('guestCount').textContent = data.queue.length;
+            document.getElementById('premiumLimit').textContent = data.premium_limit;
+            document.getElementById('oneShotPrice').textContent = data.one_shot_price;
+
+            // New venue-related updates
+            document.getElementById('venueModeToggle').checked = data.venue_mode_enabled;
+            document.getElementById('guestsInVenue').textContent = data.guests_in_venue
+
+        }
+
+        async function openQueue() {
+            await fetch('/open', { method: 'POST' });
+            fetchStatus();
+        }
+
+        async function closeQueue() {
+            await fetch('/close', { method: 'POST' });
+            fetchStatus();
+        }
+
+        async function resetQueue() {
+            await fetch('/reset', { method: 'POST' });
+            fetchStatus();
+        }
+
+        async function mockGuests() {
+            const count = document.getElementById('mockCount').value;
+            if (count > 0) {
+                await fetch(`/mock-guests/${count}`, { method: 'POST' });
+                fetchStatus();
+            }
+        }
+
+        async function setPremiumLimit() {
+            const limit = document.getElementById('premiumLimitInput').value;
+            if (limit >= 0) {
+                await fetch('/set-premium-limit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ limit: parseInt(limit) })
+                });
+                fetchStatus();
+            }
+        }
+
+        async function setOneShotPrice() {
+            const price = document.getElementById('oneShotPriceInput').value;
+            if (price >= 0) {
+                await fetch('/set-one-shot-price', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ price: parseInt(price) })
+                });
+                fetchStatus();
+            }
+        }
+
+        async function toggleVenueMode() {
+            const enabled = document.getElementById('venueModeToggle').checked;
+            await fetch('/set-venue-mode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled })
+            });
+            fetchStatus();
+        }
+
+        async function setVenueCapacity() {
+            const capacity = document.getElementById('venueCapacityInput').value;
+            if (capacity >= 0) {
+                await fetch('/set-venue-capacity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ capacity: parseInt(capacity) })
+                });
+                fetchStatus();
+            }
+        }
+
+
+        fetchStatus();
+        setInterval(fetchStatus, 5000);
+    </script>
+</body>
+
+</html>

@@ -32,7 +32,8 @@
                 const response = await fetch('/status');
                 const data = await response.json();
 
-                document.getElementById('guestCount').textContent = data.queue.length;
+                document.getElementById('guestCount').textContent = data.queue.length;           
+                document.getElementById('queueStatus').textContent = data.is_open ? 'Open' : 'Closed';
 
                 const isFull = data.venue_mode_enabled && data.guests_in_venue >= data.venue_capacity;
                 document.getElementById('venueStatus').textContent = isFull ? 'Full' : 'Available';

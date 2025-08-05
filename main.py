@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from routes import router
 import os
@@ -33,7 +33,8 @@ def get_status(pretty: bool = False):
     }
 
     if pretty:
-        return JSONResponse(content=json.loads(json.dumps(response_data, indent=4)))
+        pretty_json = json.dumps(response_data, indent=4)
+        return PlainTextResponse(content=pretty_json, media_type="application/json")
     return response_data
 
 

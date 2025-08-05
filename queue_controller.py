@@ -60,33 +60,6 @@ class QueueController:
             "premium": True
         })
 
-    
-    """
-    def join_premium_queue(self, email: str):
-        if not self.is_open:
-            raise HTTPException(status_code=403, detail="Queue is closed.")
-
-        # Check if guest is already in the queue
-        for guest in self.queue:
-            if guest["email"] == email:
-                if guest.get("premium"):
-                    raise HTTPException(status_code=400, detail="Guest already in premium queue.")
-                else:
-                    guest["premium"] = True  # Upgrade to premium
-                    return
-
-        # Check premium slot availability
-        premium_count = sum(1 for g in self.queue[1:] if g["premium"])
-        if premium_count >= self.premium_limit:
-            raise HTTPException(status_code=403, detail="No premium slots available.")
-
-        # Insert at next available premium position (starting at index 1)
-        insert_index = 1
-        while insert_index < len(self.queue) and self.queue[insert_index]["premium"]:
-            insert_index += 1
-
-        self.queue.insert(insert_index, {"email": email, "premium": True})
-        """
 
     def get_position(self, email: str) -> int:
         for i, guest in enumerate(self.queue):

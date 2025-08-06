@@ -1,13 +1,12 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
-from routes import router
-import os
 import json
 
 #my modules
 #from queue_controller import QueueController
 from queue_instance import queue
+from routes import router
 
 
 app = FastAPI(title="Virtual Queue System")
@@ -54,7 +53,6 @@ def serve_admin():
 def serve_clicker():
     return FileResponse("clicker_web_app.html")
 
-
 @app.get("/payment")
 def get_payment_mock():
     return FileResponse("payment_mock.html")
@@ -63,10 +61,12 @@ def get_payment_mock():
 @app.post("/set-premium-limit")
 def set_premium_limit(data: dict):
     queue.set_premium_limit(data["limit"])
+    return {"message": "Premium limit updated"}
 
 @app.post("/set-one-shot-price")
 def set_one_shot_price(data: dict):
     queue.set_one_shot_price(data["price"])
+    return {"message": "One shot price updated"}
 
 @app.post("/join-premium")
 async def join_premium(request: Request):

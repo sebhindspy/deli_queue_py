@@ -55,11 +55,7 @@ class QueueController:
         while insert_index < len(self.queue) and self.queue[insert_index]["premium"]:
             insert_index += 1
 
-        self.queue.insert(insert_index, {
-            "email": email,
-            "premium": True
-        })
-
+        self.queue.insert(insert_index, {"email": email, "premium": True})
 
     def get_position(self, email: str) -> int:
         for i, guest in enumerate(self.queue):

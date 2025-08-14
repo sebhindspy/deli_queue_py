@@ -1,10 +1,12 @@
+# a comment to get started
+# Testing Git commit functionality - added this comment to verify repository setup
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 import json
 
-#my modules
-#from queue_controller import QueueController
+# my modules
+# from queue_controller import QueueController
 from queue_instance import queue
 from routes import router
 
@@ -12,7 +14,7 @@ from routes import router
 app = FastAPI(title="Virtual Queue System")
 
 # Create an instance of the controller
-#queue = QueueController()
+# queue = QueueController()
 
 # Include API routes
 app.include_router(router)
@@ -22,13 +24,14 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Serve static HTML files
 
+
 @app.get("/status")
 def get_status(pretty: bool = False):
     base_status = queue.get_status()
     response_data = {
         **base_status,
         "total_guests": len(base_status["queue"]),
-        "next_guest": base_status["queue"][0] if base_status["queue"] else None
+        "next_guest": base_status["queue"][0] if base_status["queue"] else None,
     }
 
     if pretty:
@@ -41,17 +44,21 @@ def get_status(pretty: bool = False):
 def serve_guest():
     return FileResponse("guest_web_app.html")
 
+
 @app.get("/attendant")
 def serve_attendant():
     return FileResponse("attendant_web_app.html")
+
 
 @app.get("/admin")
 def serve_admin():
     return FileResponse("admin_control_panel.html")
 
+
 @app.get("/clicker")
 def serve_clicker():
     return FileResponse("clicker_web_app.html")
+
 
 @app.get("/payment")
 def get_payment_mock():
@@ -63,10 +70,12 @@ def set_premium_limit(data: dict):
     queue.set_premium_limit(data["limit"])
     return {"message": "Premium limit updated"}
 
+
 @app.post("/set-one-shot-price")
 def set_one_shot_price(data: dict):
     queue.set_one_shot_price(data["price"])
     return {"message": "One shot price updated"}
+
 
 @app.post("/join-premium")
 async def join_premium(request: Request):
@@ -76,5 +85,3 @@ async def join_premium(request: Request):
         raise HTTPException(status_code=400, detail="Email is required.")
     queue.join_premium_queue(email)
     return {"message": "Premium join successful"}
-
-

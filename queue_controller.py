@@ -1,27 +1,50 @@
 from typing import List, Dict, Optional
 from fastapi import HTTPException
 
+
 class QueueController:
     def __init__(self):
-        self.queue: List[Dict[str, any]] = []  # Each guest is a dict: {"email": str, "premium": bool}
+        self.queue: List[
+            Dict[str, any]
+        ] = []  # Each guest is a dict: {"email": str, "premium": bool}
         self.is_open = True
         self.premium_limit = 3  # Default limit, can be changed via admin
         self.one_shot_price = 5  # Default price in dollars
         self.venue_mode_enabled = False
         self.venue_capacity = 0
         self.guests_in_venue = 0
+        self.ready_pool_limit = (
+            0  # 0 means disabled; when >0, top N guests are considered "ready"
+        )
 
     ### system status
 
     def get_status(self):
+        if self.ready_pool_limit and self.ready_pool_limit > 0:
+            ready_count = min(self.ready_pool_limit, len(self.queue))
+        else:
+            ready_count = 1 if len(self.queue) > 0 else 0
+
+        queue_with_location: List[Dict[str, any]] = []
+        for index, guest in enumerate(self.queue):
+            queue_with_location.append(
+                {
+                    "email": guest.get("email"),
+                    "premium": guest.get("premium", False),
+                    "guest_location": "ready" if index < ready_count else "in queue",
+                }
+            )
+
         return {
             "is_open": self.is_open,
-            "queue": self.queue,
+            "queue": queue_with_location,
             "premium_limit": self.premium_limit,
             "one_shot_price": self.one_shot_price,
             "venue_mode_enabled": self.venue_mode_enabled,
             "venue_capacity": self.venue_capacity,
-            "guests_in_venue": self.guests_in_venue
+            "guests_in_venue": self.guests_in_venue,
+            "ready_pool_limit": self.ready_pool_limit,
+            "ready_pool": self.get_ready_pool(),
         }
 
     ### joining and leaving the queue
@@ -31,7 +54,7 @@ class QueueController:
             raise HTTPException(status_code=403, detail="Queue is closed.")
         if not any(g["email"] == email for g in self.queue):
             self.queue.append({"email": email, "premium": False})
-    
+
     def join_premium_queue(self, email: str):
         if not self.is_open:
             raise HTTPException(status_code=403, detail="Queue is closed.")
@@ -41,7 +64,9 @@ class QueueController:
         for i, guest in enumerate(self.queue):
             if guest["email"] == email:
                 if guest.get("premium"):
-                    raise HTTPException(status_code=400, detail="Guest already in premium queue.")
+                    raise HTTPException(
+                        status_code=400, detail="Guest already in premium queue."
+                    )
                 existing_guest = self.queue.pop(i)
                 break
 
@@ -79,7 +104,6 @@ class QueueController:
                     self.increment_guests_in_venue()
                 return
 
-
     ### basic queue settings
 
     def open_queue(self):
@@ -95,7 +119,6 @@ class QueueController:
         for i in range(count):
             self.queue.append({"email": f"mock{i}@example.com", "premium": False})
 
-
     ### premuim queue bits
 
     def set_premium_limit(self, limit: int):
@@ -110,7 +133,6 @@ class QueueController:
                 return guest["premium"]
         raise HTTPException(status_code=404, detail="Guest not in queue.")
 
-
     ### venue mode functionality
 
     def set_venue_mode(self, enabled: bool):
@@ -120,7 +142,11 @@ class QueueController:
         self.venue_capacity = capacity
 
     def is_venue_full(self) -> bool:
-        return self.guests_in_venue >= self.venue_capacity if self.venue_mode_enabled else False
+        return (
+            self.guests_in_venue >= self.venue_capacity
+            if self.venue_mode_enabled
+            else False
+        )
 
     def increment_guests_in_venue(self):
         if self.guests_in_venue < self.venue_capacity:
@@ -134,5 +160,39 @@ class QueueController:
         else:
             raise HTTPException(status_code=400, detail="No guests in venue to remove.")
 
+    ### ready pool functionality
 
+    def set_ready_pool_limit(self, limit: int):
+        if limit < 0:
+            raise HTTPException(
+                status_code=400, detail="Ready pool limit must be non-negative."
+            )
+        self.ready_pool_limit = limit
 
+    def get_ready_pool(self) -> List[Dict[str, any]]:
+        if self.ready_pool_limit and self.ready_pool_limit > 0:
+            return self.queue[: min(self.ready_pool_limit, len(self.queue))]
+        return []
+
+    def scan_guest(self, email: str):
+        if self.venue_mode_enabled and self.is_venue_full():
+            raise HTTPException(status_code=403, detail="Venue is full.")
+        for i, guest in enumerate(self.queue):
+            if guest["email"] == email:
+                # Enforce readiness
+                if self.ready_pool_limit and self.ready_pool_limit > 0:
+                    if i >= min(self.ready_pool_limit, len(self.queue)):
+                        raise HTTPException(
+                            status_code=403, detail="Guest is not in the ready pool."
+                        )
+                else:
+                    if i != 0:
+                        raise HTTPException(
+                            status_code=403, detail="Guest is not ready."
+                        )
+
+                self.queue.pop(i)
+                if self.venue_mode_enabled:
+                    self.increment_guests_in_venue()
+                return
+        raise HTTPException(status_code=404, detail="Guest not in queue.")

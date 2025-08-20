@@ -85,3 +85,26 @@ async def join_premium(request: Request):
         raise HTTPException(status_code=400, detail="Email is required.")
     queue.join_premium_queue(email)
     return {"message": "Premium join successful"}
+
+
+@app.post("/set-ready-pool-limit")
+def set_ready_pool_limit(data: dict):
+    limit = data.get("limit")
+    if limit is None:
+        raise HTTPException(status_code=400, detail="Limit is required.")
+    if not isinstance(limit, int) or limit < 0:
+        raise HTTPException(
+            status_code=400, detail="Limit must be a non-negative integer."
+        )
+    queue.set_ready_pool_limit(limit)
+    return {"message": "Ready pool limit updated"}
+
+
+@app.post("/scan")
+async def scan_guest(request: Request):
+    data = await request.json()
+    email = data.get("email")
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required.")
+    queue.scan_guest(email)
+    return {"message": "Guest scanned and removed from queue"}

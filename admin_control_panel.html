@@ -13,6 +13,7 @@
         <h2>Admin Control Panel</h2>
         <div class="status">
             <p><strong>Queue status:</strong> <span id="queueStatus">Loading...</span></p>
+            <p><strong>Ready pool:</strong> <span id="readyPoolLimit">Disabled</span></p>
             <p><strong>Guests in queue:</strong> <span id="guestCount">0</span></p>
             <p><strong>Guests in venue:</strong> <span id="guestsInVenue">Loading...</span></p>
             <p><strong>Premium limit:</strong> <span id="premiumLimit">Loading...</span></p>
@@ -53,6 +54,13 @@
         <input type="number" id="venueCapacityInput" placeholder="Set Venue Capacity">
         <button onclick="setVenueCapacity()">Update Venue Capacity</button>
 
+        <hr>
+
+        <h3>Ready pool</h3>
+        <p><strong>Current ready pool:</strong> <span id="readyPoolLimit">Disabled</span></p>
+        <input type="number" id="readyPoolLimitInput" placeholder="Set Ready Pool Size (0 to disable)">
+        <button onclick="setReadyPoolLimit()">Update Ready Pool</button>
+
     </div>
 
     <script>
@@ -68,6 +76,10 @@
             // New venue-related updates
             document.getElementById('venueModeToggle').checked = data.venue_mode_enabled;
             document.getElementById('guestsInVenue').textContent = data.guests_in_venue
+
+            // Ready pool updates
+            const limit = data.ready_pool_limit || 0;
+            document.getElementById('readyPoolLimit').textContent = limit > 0 ? limit : 'Disabled';
 
         }
 
@@ -135,6 +147,18 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ capacity: parseInt(capacity) })
+                });
+                fetchStatus();
+            }
+        }
+
+        async function setReadyPoolLimit() {
+            const limit = document.getElementById('readyPoolLimitInput').value;
+            if (limit >= 0) {
+                await fetch('/set-ready-pool-limit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ limit: parseInt(limit) })
                 });
                 fetchStatus();
             }

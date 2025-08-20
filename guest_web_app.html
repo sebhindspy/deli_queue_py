@@ -184,7 +184,8 @@
 
                         positionSpan.textContent = data.position;
 
-                        if (data.position === 0) {
+                        const readyPoolSize = data.ready_pool_limit || 0;
+                        if ((readyPoolSize > 0 && data.position < readyPoolSize) || (readyPoolSize === 0 && data.position === 0)) {
                             turnMessage.textContent = "It's your turn! Please proceed to the attraction.";
                             qrContainer.innerHTML = "";
                             new QRCode(qrContainer, {

@@ -22,6 +22,8 @@
             <p><strong>Queue status:</strong> <span id="queueStatus">Loading...</span></p>
             <p><strong>Guests in queue:</strong> <span id="guestCount">0</span></p>
             <p><strong>Next guest:</strong> <span id="nextGuest">Loading..</span><span id="premiumBadge"></span></p>
+            <p><strong>Ready pool:</strong></p>
+            <ul id="readyPoolList"></ul>
         </div>
 
         <button id="advanceBtn" onclick="advanceQueue()">Remove guest from queue</button>
@@ -40,8 +42,10 @@
 
                 const advanceBtn = document.getElementById('advanceBtn');
 
+                const readyPool = Array.isArray(data.ready_pool) ? data.ready_pool : [];
+
                 if (data.queue.length > 0 && !isFull) {
-                    const nextGuest = data.queue[0];
+                    const nextGuest = readyPool.length > 0 ? readyPool[0] : data.queue[0];
                     const email = typeof nextGuest === 'object' && nextGuest.email ? nextGuest.email : String(nextGuest);
                     const isPremium = typeof nextGuest === 'object' && nextGuest.premium;
 
@@ -55,6 +59,15 @@
                     document.getElementById('premiumBadge').className = '';
                     advanceBtn.disabled = true;
                 }
+
+                const readyPoolList = document.getElementById('readyPoolList');
+                readyPoolList.innerHTML = '';
+                readyPool.forEach(g => {
+                    const li = document.createElement('li');
+                    const email = typeof g === 'object' && g.email ? g.email : String(g);
+                    li.textContent = email + (g.premium ? ' (Premium)' : '');
+                    readyPoolList.appendChild(li);
+                });
             } catch (error) {
                 console.error('Error fetching status:', error);
             }
@@ -83,15 +96,15 @@
             document.getElementById("result").innerText = `Scanned Email: ${decodedText}`;
 
             try {
-                const response = await fetch("/advance", { method: "POST" });
+                const response = await fetch("/scan", { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: decodedText }) });
                 if (response.ok) {
-                    document.getElementById("result").innerText = "Reservation completed";
+                    document.getElementById("result").innerText = "Guest scanned";
                 } else {
                     const error = await response.json();
-                    alert(error.detail || "Failed to advance queue.");
+                    alert(error.detail || "Failed to scan guest.");
                 }
             } catch (err) {
-                console.error("Error advancing queue:", err);
+                console.error("Error scanning guest:");
                 alert("An error occurred while processing the scan.");
             }
 

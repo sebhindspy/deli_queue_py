@@ -40,7 +40,7 @@ jobs:
         run: sam build --use-container | cat
 
       - name: Deploy API
-        run: sam deploy --no-confirm-changeset --stack-name deli-queue --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=true --force | cat
+        run: sam deploy --no-confirm-changeset --stack-name deli-queue --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=true --no-fail-on-empty-changeset | cat
 
       - name: Get API URL
         id: get_api

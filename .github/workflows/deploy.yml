@@ -60,6 +60,7 @@ jobs:
           cp clicker_web_app.html dist/
           cp attendant_web_app.html dist/
           cp guest_web_app.html dist/
+          cp payment_mock.html dist/
           echo "window.API_BASE='${{ steps.get_api.outputs.API_URL }}'" > dist/static/config.js
 
       - name: Upload static site to S3

@@ -15,6 +15,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Debug
+        run: |
+          pwd
+          ls -la
+          echo "Repo contents:"
+          find . -name "template.yaml"
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:

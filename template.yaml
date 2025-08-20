@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Virtual Queue API and Static Site
+
+Globals:
+  Function:
+    Runtime: python3.11
+    Timeout: 15
+    MemorySize: 512
+    Tracing: Active
+
+Parameters:
+  StageName:
+    Type: String
+    Default: prod
+  AppId:
+    Type: String
+    Default: default
+  EnableDynamoDB:
+    Type: String
+    AllowedValues: ["true", "false"]
+    Default: "false"
+
+Conditions:
+  UseDynamoDB: !Equals [!Ref EnableDynamoDB, "true"]
+
+Resources:
+  QueueTable:
+    Type: AWS::DynamoDB::Table
+    Condition: UseDynamoDB
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: main.handler
+      Architectures:
+        - x86_64
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref HttpApi
+      Environment:
+        Variables:
+          APP_ID: !Ref AppId
+          DDB_TABLE_NAME: !If [UseDynamoDB, !Ref QueueTable, ""]
+          CORS_ORIGINS: "*"
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - !If
+          - UseDynamoDB
+          - DynamoDBCrudPolicy:
+              TableName: !Ref QueueTable
+          - !Ref "AWS::NoValue"
+
+  HttpApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref StageName
+      Cors:
+        AllowMethods: ['*']
+        AllowHeaders: ['*']
+        AllowOrigin: "*"
+
+Outputs:
+  ApiUrl:
+    Description: Invoke URL for your API
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
+  DynamoDBTable:
+    Condition: UseDynamoDB
+    Value: !Ref QueueTable
+    Description: DynamoDB table name for queue state
+
+

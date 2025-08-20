@@ -1,5 +1,7 @@
 from typing import List, Dict, Optional
 from fastapi import HTTPException
+from persistence import InMemoryPersistence, DynamoDBPersistence
+import os
 
 
 class QueueController:
@@ -16,6 +18,13 @@ class QueueController:
         self.ready_pool_limit = (
             0  # 0 means disabled; when >0, top N guests are considered "ready"
         )
+        # persistence
+        self._app_id = os.getenv("APP_ID", "default")
+        table_name = os.getenv("DDB_TABLE_NAME")
+        self._store = (
+            DynamoDBPersistence(table_name) if table_name else InMemoryPersistence()
+        )
+        self._load()
 
     ### system status
 
@@ -54,6 +63,7 @@ class QueueController:
             raise HTTPException(status_code=403, detail="Queue is closed.")
         if not any(g["email"] == email for g in self.queue):
             self.queue.append({"email": email, "premium": False})
+            self._save()
 
     def join_premium_queue(self, email: str):
         if not self.is_open:
@@ -81,6 +91,7 @@ class QueueController:
             insert_index += 1
 
         self.queue.insert(insert_index, {"email": email, "premium": True})
+        self._save()
 
     def get_position(self, email: str) -> int:
         for i, guest in enumerate(self.queue):
@@ -95,6 +106,7 @@ class QueueController:
             self.queue.pop(0)
             if self.venue_mode_enabled:
                 self.increment_guests_in_venue()
+            self._save()
 
     def leave_queue(self, email: str):
         for i, guest in enumerate(self.queue):
@@ -102,6 +114,7 @@ class QueueController:
                 self.queue.pop(i)
                 if self.venue_mode_enabled:
                     self.increment_guests_in_venue()
+                self._save()
                 return
 
     ### basic queue settings
@@ -114,6 +127,7 @@ class QueueController:
 
     def reset_queue(self):
         self.queue.clear()
+        self._save()
 
     def mock_guests(self, count: int):
         for i in range(count):
@@ -123,9 +137,11 @@ class QueueController:
 
     def set_premium_limit(self, limit: int):
         self.premium_limit = limit
+        self._save()
 
     def set_one_shot_price(self, price: int):
         self.one_shot_price = price
+        self._save()
 
     def is_premium(self, email: str) -> bool:
         for guest in self.queue:
@@ -137,9 +153,11 @@ class QueueController:
 
     def set_venue_mode(self, enabled: bool):
         self.venue_mode_enabled = enabled
+        self._save()
 
     def set_venue_capacity(self, capacity: int):
         self.venue_capacity = capacity
+        self._save()
 
     def is_venue_full(self) -> bool:
         return (
@@ -153,12 +171,14 @@ class QueueController:
             self.guests_in_venue += 1
         else:
             raise HTTPException(status_code=403, detail="Venue is full.")
+        self._save()
 
     def decrement_guests_in_venue(self):
         if self.guests_in_venue > 0:
             self.guests_in_venue -= 1
         else:
             raise HTTPException(status_code=400, detail="No guests in venue to remove.")
+        self._save()
 
     ### ready pool functionality
 
@@ -168,6 +188,7 @@ class QueueController:
                 status_code=400, detail="Ready pool limit must be non-negative."
             )
         self.ready_pool_limit = limit
+        self._save()
 
     def get_ready_pool(self) -> List[Dict[str, any]]:
         if self.ready_pool_limit and self.ready_pool_limit > 0:
@@ -194,5 +215,44 @@ class QueueController:
                 self.queue.pop(i)
                 if self.venue_mode_enabled:
                     self.increment_guests_in_venue()
+                self._save()
                 return
         raise HTTPException(status_code=404, detail="Guest not in queue.")
+
+    def _serialize(self) -> Dict[str, any]:
+        return {
+            "queue": self.queue,
+            "is_open": self.is_open,
+            "premium_limit": self.premium_limit,
+            "one_shot_price": self.one_shot_price,
+            "venue_mode_enabled": self.venue_mode_enabled,
+            "venue_capacity": self.venue_capacity,
+            "guests_in_venue": self.guests_in_venue,
+            "ready_pool_limit": self.ready_pool_limit,
+        }
+
+    def _hydrate(self, state: Dict[str, any]):
+        self.queue = state.get("queue", [])
+        self.is_open = state.get("is_open", True)
+        self.premium_limit = state.get("premium_limit", 0)
+        self.one_shot_price = state.get("one_shot_price", 5)
+        self.venue_mode_enabled = state.get("venue_mode_enabled", False)
+        self.venue_capacity = state.get("venue_capacity", 0)
+        self.guests_in_venue = state.get("guests_in_venue", 0)
+        self.ready_pool_limit = state.get("ready_pool_limit", 0)
+
+    def _load(self):
+        try:
+            state = self._store.load_state(self._app_id)
+            if state:
+                self._hydrate(state)
+        except Exception:
+            # best-effort load; remain with defaults on error
+            pass
+
+    def _save(self):
+        try:
+            self._store.save_state(self._app_id, self._serialize())
+        except Exception:
+            # best-effort save; ignore errors in stateless/local mode
+            pass

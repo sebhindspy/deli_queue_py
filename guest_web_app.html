@@ -6,7 +6,8 @@
     <meta charset="utf-8" />
     <title>Guest Queue App</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="static/style.css">
+    <script src="static/config.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
@@ -31,6 +32,9 @@
     </div>
 
     <script>
+        const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
+        const api = (path) => `${API_BASE}${path}`;
+
         let inQueue = false;
         let intervalId = null;
         let premiumPurchased = false;
@@ -84,7 +88,7 @@
                 return;
             }
 
-            const res = await fetch("/join-premium", {
+            const res = await fetch(api('/join-premium'), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email })
@@ -119,7 +123,7 @@
         });
 
         function joinQueue(email) {
-            fetch("/join", {
+            fetch(api('/join'), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email })
@@ -133,7 +137,7 @@
         }
 
         function leaveQueue(email) {
-            fetch("/leave", {
+            fetch(api('/leave'), {
                 method: "POST",
                 headers: { "Content-type": "application/json" },
                 body: JSON.stringify({ email })
@@ -171,7 +175,7 @@
             let missedPolls = 0;
             fetchQueueStatus();
             intervalId = setInterval(() => {
-                fetch(`/position/${encodeURIComponent(email)}`)
+                fetch(api(`/position/${encodeURIComponent(email)}`))
                     .then(res => {
                         if (!res.ok) throw new Error("Guest not found");
                         return res.json();
@@ -210,7 +214,7 @@
         }
 
         function fetchQueueStatus() {
-            fetch("/status")
+            fetch(api('/status'))
                 .then(res => res.json())
                 .then(data => {
                     queueStatusDiv.textContent = ` ${data.is_open ? "Open" : "Closed"}`;

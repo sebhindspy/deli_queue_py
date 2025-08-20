@@ -1,9 +1,12 @@
 # a comment to get started
 # Testing Git commit functionality - added this comment to verify repository setup
 from fastapi import FastAPI, Request, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 import json
+import os
+from mangum import Mangum
 
 # my modules
 # from queue_controller import QueueController
@@ -12,6 +15,17 @@ from routes import router
 
 
 app = FastAPI(title="Virtual Queue System")
+
+# CORS for S3/CloudFront-hosted frontends
+cors_origins_env = os.getenv("CORS_ORIGINS", "*")
+allowed_origins = [o.strip() for o in cors_origins_env.split(",") if o.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins if allowed_origins else ["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Create an instance of the controller
 # queue = QueueController()
@@ -108,3 +122,7 @@ async def scan_guest(request: Request):
         raise HTTPException(status_code=400, detail="Email is required.")
     queue.scan_guest(email)
     return {"message": "Guest scanned and removed from queue"}
+
+
+# AWS Lambda handler for API Gateway
+handler = Mangum(app)

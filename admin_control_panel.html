@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <title>Admin Control Panel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="static/style.css">
+    <script src="static/config.js"></script>
 </head>
 
 <body>
@@ -64,8 +65,11 @@
     </div>
 
     <script>
+        const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
+        const api = (path) => `${API_BASE}${path}`;
+
         async function fetchStatus() {
-            const res = await fetch('/status');
+            const res = await fetch(api('/status'));
             const data = await res.json();
             console.log(data); // for debug
             document.getElementById('queueStatus').textContent = data.is_open ? 'Open' : 'Closed';
@@ -84,24 +88,24 @@
         }
 
         async function openQueue() {
-            await fetch('/open', { method: 'POST' });
+            await fetch(api('/open'), { method: 'POST' });
             fetchStatus();
         }
 
         async function closeQueue() {
-            await fetch('/close', { method: 'POST' });
+            await fetch(api('/close'), { method: 'POST' });
             fetchStatus();
         }
 
         async function resetQueue() {
-            await fetch('/reset', { method: 'POST' });
+            await fetch(api('/reset'), { method: 'POST' });
             fetchStatus();
         }
 
         async function mockGuests() {
             const count = document.getElementById('mockCount').value;
             if (count > 0) {
-                await fetch(`/mock-guests/${count}`, { method: 'POST' });
+                await fetch(api(`/mock-guests/${count}`), { method: 'POST' });
                 fetchStatus();
             }
         }
@@ -109,7 +113,7 @@
         async function setPremiumLimit() {
             const limit = document.getElementById('premiumLimitInput').value;
             if (limit >= 0) {
-                await fetch('/set-premium-limit', {
+                await fetch(api('/set-premium-limit'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ limit: parseInt(limit) })
@@ -121,7 +125,7 @@
         async function setOneShotPrice() {
             const price = document.getElementById('oneShotPriceInput').value;
             if (price >= 0) {
-                await fetch('/set-one-shot-price', {
+                await fetch(api('/set-one-shot-price'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ price: parseInt(price) })
@@ -132,7 +136,7 @@
 
         async function toggleVenueMode() {
             const enabled = document.getElementById('venueModeToggle').checked;
-            await fetch('/set-venue-mode', {
+            await fetch(api('/set-venue-mode'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ enabled })
@@ -143,7 +147,7 @@
         async function setVenueCapacity() {
             const capacity = document.getElementById('venueCapacityInput').value;
             if (capacity >= 0) {
-                await fetch('/set-venue-capacity', {
+                await fetch(api('/set-venue-capacity'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ capacity: parseInt(capacity) })
@@ -155,7 +159,7 @@
         async function setReadyPoolLimit() {
             const limit = document.getElementById('readyPoolLimitInput').value;
             if (limit >= 0) {
-                await fetch('/set-ready-pool-limit', {
+                await fetch(api('/set-ready-pool-limit'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ limit: parseInt(limit) })

@@ -60,7 +60,7 @@
         function goToPayment() {
             const email = getEmailFromQuery();
             if (email) {
-                window.location.href = `/payment?email=${encodeURIComponent(email)}`;
+                window.location.href = `payment_mock.html?email=${encodeURIComponent(email)}`;
             } else {
                 alert("Missing guest email. Cannot proceed to payment.");
             }

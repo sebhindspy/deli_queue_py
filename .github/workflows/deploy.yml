@@ -30,11 +30,9 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Build
-        working-directory: ./deli_queue_py
         run: sam build --use-container | cat
 
       - name: Deploy API
-        working-directory: ./deli_queue_py
         run: sam deploy --no-confirm-changeset --stack-name deli-queue --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=true | cat
 
       - name: Get API URL
@@ -42,17 +40,17 @@ jobs:
         run: echo "API_URL=$(aws cloudformation describe-stacks --stack-name deli-queue --query 'Stacks[0].Outputs[?OutputKey==`ApiUrl`].OutputValue' --output text)" >> $GITHUB_OUTPUT
 
       - name: Inject API URL into config.js
-        working-directory: ./deli_queue_py
         run: |
           mkdir -p dist/static
           cp -r static dist/
           cp admin_control_panel.html dist/
+          cp attendant_control_panel.html dist/
           cp attendant_web_app.html dist/
           cp guest_web_app.html dist/
           echo "window.API_BASE='${{ steps.get_api.outputs.API_URL }}'" > dist/static/config.js
 
       - name: Upload static site to S3
         run: |
-          aws s3 sync deli_queue_py/dist s3://${{ secrets.S3_BUCKET }} --delete
+          aws s3 sync dist s3://${{ secrets.S3_BUCKET }} --delete
 
 

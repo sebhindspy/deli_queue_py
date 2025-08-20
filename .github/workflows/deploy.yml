@@ -40,7 +40,13 @@ jobs:
         run: sam build --use-container | cat
 
       - name: Deploy API
-        run: sam deploy --no-confirm-changeset --stack-name deli-queue --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=true --no-fail-on-empty-changeset | cat
+        run: |
+          # Try to delete existing failed stack first
+          sam delete --stack-name deli-queue --no-prompts || true
+          # Wait a moment for deletion to complete
+          sleep 10
+          # Deploy fresh stack
+          sam deploy --no-confirm-changeset --stack-name deli-queue --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=true | cat
 
       - name: Get API URL
         id: get_api

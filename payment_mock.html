@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <title>Mock Payment</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="static/style.css">
+    <script src="static/config.js"></script>
 </head>
 <body>
     <div class="container">
         <h2>Mock Payment Page</h2>
 
-        <img src="/static/accessoPay.png" style="max-width: -webkit-fill-available"><img/>
+        <img src="static/accessoPay.png" style="max-width: -webkit-fill-available"><img/>
 
         <button onclick="completePayment()">Mock payment complete</button>
     </div>
@@ -24,7 +25,7 @@
         function completePayment() {
             const email = getEmailFromQuery();
             if (email) {
-                window.location.href = `/guest?email=${encodeURIComponent(email)}&paid=true`;
+                window.location.href = `guest_web_app.html?email=${encodeURIComponent(email)}&paid=true`;
             } else {
                 alert("Missing guest email. Cannot return to guest app.");
             }

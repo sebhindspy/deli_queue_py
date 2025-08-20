@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>Clicker App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="static/style.css">
+    <script src="static/config.js"></script>
 </head>
 <body>
     <div class="container">
@@ -19,8 +20,11 @@
     </div>
 
     <script>
+        const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
+        const api = (path) => `${API_BASE}${path}`;
+
         async function fetchVenueStatus() {
-            const res = await fetch('/status');
+            const res = await fetch(api('/status'));
             const data = await res.json();
             const isFull = data.guests_in_venue >= data.venue_capacity;
             document.getElementById('venueStatus').textContent = isFull ? 'Full' : 'Available';
@@ -28,7 +32,7 @@
         }
 
         async function decrementVenue() {
-            const res = await fetch('/decrement-venue', { method: 'POST' });
+            const res = await fetch(api('/decrement-venue'), { method: 'POST' });
             if (res.ok) {
                 fetchVenueStatus();
             } else {

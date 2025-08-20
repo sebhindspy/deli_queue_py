@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Queue Status Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/style.css">
+    <script src="static/config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Queue Status Dashboard</h2>
+        
+        <div class="status">
+            <p><strong>API Base URL:</strong> <span id="apiBase">Loading...</span></p>
+            <p><strong>Queue Status:</strong> <span id="queueStatus">Loading...</span></p>
+            <p><strong>Total Guests:</strong> <span id="totalGuests">0</span></p>
+            <p><strong>Ready Pool:</strong> <span id="readyPool">Loading...</span></p>
+            <p><strong>Venue Status:</strong> <span id="venueStatus">Loading...</span></p>
+            <p><strong>Guests in Venue:</strong> <span id="guestsInVenue">0</span></p>
+        </div>
+
+        <div class="queue-list">
+            <h3>Current Queue</h3>
+            <div id="queueList">Loading...</div>
+        </div>
+
+        <div class="actions">
+            <button onclick="refreshStatus()">Refresh Status</button>
+            <button onclick="openAdmin()">Open Admin Panel</button>
+            <button onclick="openAttendant()">Open Attendant App</button>
+            <button onclick="openGuest()">Open Guest App</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
+        const api = (path) => `${API_BASE}${path}`;
+
+        // Display the current API base URL
+        document.getElementById('apiBase').textContent = API_BASE || 'Not configured';
+
+        async function fetchStatus() {
+            try {
+                const response = await fetch(api('/status'));
+                if (!response.ok) throw new Error('Failed to fetch status');
+                
+                const data = await response.json();
+                
+                // Update status fields
+                document.getElementById('queueStatus').textContent = data.is_open ? 'Open' : 'Closed';
+                document.getElementById('totalGuests').textContent = data.queue.length;
+                document.getElementById('readyPool').textContent = data.ready_pool_limit > 0 ? `${data.ready_pool_limit} guests` : 'Disabled';
+                
+                const isFull = data.venue_mode_enabled && data.guests_in_venue >= data.venue_capacity;
+                document.getElementById('venueStatus').textContent = isFull ? 'Full' : 'Available';
+                document.getElementById('guestsInVenue').textContent = data.guests_in_venue;
+
+                // Update queue list
+                const queueList = document.getElementById('queueList');
+                if (data.queue.length === 0) {
+                    queueList.innerHTML = '<p>No guests in queue</p>';
+                } else {
+                    let queueHtml = '<ul>';
+                    data.queue.forEach((guest, index) => {
+                        const location = guest.guest_location || (index === 0 ? 'ready' : 'in queue');
+                        const premium = guest.premium ? ' (Premium)' : '';
+                        queueHtml += `<li><strong>${index + 1}.</strong> ${guest.email}${premium} - <em>${location}</em></li>`;
+                    });
+                    queueHtml += '</ul>';
+                    queueList.innerHTML = queueHtml;
+                }
+            } catch (error) {
+                console.error('Error fetching status:', error);
+                document.getElementById('queueStatus').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        function refreshStatus() {
+            fetchStatus();
+        }
+
+        function openAdmin() {
+            window.open('admin_control_panel.html', '_blank');
+            window.open('attendant_web_app.html', '_blank');
+        }
+
+        function openAttendant() {
+            window.open('attendant_web_app.html', '_blank');
+        }
+
+        function openGuest() {
+            window.open('guest_web_app.html', '_blank');
+        }
+
+        // Initial load and auto-refresh every 10 seconds
+        fetchStatus();
+        setInterval(fetchStatus, 10000);
+    </script>
+</body>
+</html>

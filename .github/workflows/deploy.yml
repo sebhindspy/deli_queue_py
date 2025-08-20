@@ -35,7 +35,7 @@ jobs:
 
       - name: Deploy API
         working-directory: ./deli_queue_py
-        run: sam deploy --no-confirm-changeset --stack-name deli-queue --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=false | cat
+        run: sam deploy --no-confirm-changeset --stack-name deli-queue --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=true | cat
 
       - name: Get API URL
         id: get_api

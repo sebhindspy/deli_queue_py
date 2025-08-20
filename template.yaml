@@ -69,8 +69,8 @@ Resources:
     Properties:
       StageName: !Ref StageName
       Cors:
-        AllowMethods: "GET,POST,PUT,DELETE,OPTIONS"
-        AllowHeaders: "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+        AllowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        AllowHeaders: ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token"]
         AllowOrigin: "*"
 
 Outputs:

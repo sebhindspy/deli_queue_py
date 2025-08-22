@@ -8,17 +8,18 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <link rel="stylesheet" href="static/style.css">
     <script src="static/config.js"></script>
+    <script src="static/site_config.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
     <div class="container">
 
-        <img src="static/deliq_placeholder.png" style="max-width: 100%; height: auto; border-radius: 16px;">
+        <img src="" id="brandLogo" style="max-width: 100%; height: auto; border-radius: 16px;">
 
-        <h2>Join the Queue!</h2>
+        <h2 id="pageTitle">Join the Queue!</h2>
 
-        <p>Join the virtual queue and enjoy our other attractions while you wait or upgrade and skip the line!</p>
+        <p id="pageSubtitle">Join the virtual queue and enjoy our other attractions while you wait or upgrade and skip the line!</p>
 
         <div class="status">
             <p><strong>The queue is currently </strong> <span id="queueStatus">Loading...</span></p>
@@ -27,8 +28,8 @@
         </div>
         <div id="qrCodeContainer"></div>
         <input id="email" placeholder="Enter your email" required type="email" />
-        <button id="actionBtn">Join queue</button>
-        <button id="premiumBtn" onclick="goToPayment()">Skip the Line</button>
+        <button id="actionBtn"></button>
+        <button id="premiumBtn" onclick="goToPayment()"></button>
     </div>
 
     <script>
@@ -229,6 +230,9 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             (async function () {
+                // Apply site configuration
+                applySiteConfig();
+                
                 const emailFromUrl = getEmailFromQuery();
                 if (emailFromUrl) {
                     emailInput.value = emailFromUrl;
@@ -241,6 +245,27 @@
                 }
             })();
         });
+
+        // Apply site configuration to UI elements
+        function applySiteConfig() {
+            // Branding
+            document.getElementById('brandLogo').src = getConfig('images.logo', 'static/deliq_placeholder.png');
+            document.title = getConfig('brand.name', 'Guest Queue App');
+            
+            // Text content
+            document.getElementById('pageTitle').textContent = getConfig('text.guestTitle', 'Join the Queue!');
+            document.getElementById('pageSubtitle').textContent = getConfig('text.guestSubtitle', 'Join the virtual queue and enjoy our other attractions while you wait or upgrade and skip the line!');
+            document.getElementById('actionBtn').textContent = getConfig('text.joinButton', 'Join queue');
+            document.getElementById('premiumBtn').textContent = getConfig('text.premiumButton', 'Skip the Line');
+            
+            // Apply colors if CSS custom properties are supported
+            if (CSS.supports('color', 'var(--custom-property)')) {
+                document.documentElement.style.setProperty('--primary-color', getConfig('colors.primary', '#007bff'));
+                document.documentElement.style.setProperty('--secondary-color', getConfig('colors.secondary', '#6c757d'));
+                document.documentElement.style.setProperty('--success-color', getConfig('colors.success', '#28a745'));
+                document.documentElement.style.setProperty('--danger-color', getConfig('colors.danger', '#dc3545'));
+            }
+        }
     </script>
 </body>
 </html>

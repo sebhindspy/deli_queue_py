@@ -6,30 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/style.css">
     <script src="static/config.js"></script>
+    <script src="static/site_config.js"></script>
 </head>
 <body>
     <div class="container">
-        <h2>Queue Status Dashboard</h2>
+        <h2 id="pageTitle">Queue Status Dashboard</h2>
         
         <div class="status">
-            <p><strong>API Base URL:</strong> <span id="apiBase">Loading...</span></p>
-            <p><strong>Queue Status:</strong> <span id="queueStatus">Loading...</span></p>
-            <p><strong>Total Guests:</strong> <span id="totalGuests">0</span></p>
-            <p><strong>Ready Pool:</strong> <span id="readyPool">Loading...</span></p>
-            <p><strong>Venue Status:</strong> <span id="venueStatus">Loading...</span></p>
-            <p><strong>Guests in Venue:</strong> <span id="guestsInVenue">0</span></p>
+            <p><strong id="apiBaseLabel">API Base URL:</strong> <span id="apiBase">Loading...</span></p>
+            <p><strong id="queueStatusLabel">Queue Status:</strong> <span id="queueStatus">Loading...</span></p>
+            <p><strong id="totalGuestsLabel">Total Guests:</strong> <span id="totalGuests">0</span></p>
+            <p><strong id="readyPoolLabel">Ready Pool:</strong> <span id="readyPool">Loading...</span></p>
+            <p><strong id="venueStatusLabel">Venue Status:</strong> <span id="venueStatus">Loading...</span></p>
+            <p><strong id="guestsInVenueLabel">Guests in Venue:</strong> <span id="guestsInVenue">0</span></p>
         </div>
 
         <div class="queue-list">
-            <h3>Current Queue</h3>
+            <h3 id="currentQueueLabel">Current Queue</h3>
             <div id="queueList">Loading...</div>
         </div>
 
         <div class="actions">
-            <button onclick="refreshStatus()">Refresh Status</button>
-            <button onclick="openAdmin()">Open Admin Panel</button>
-            <button onclick="openAttendant()">Open Attendant App</button>
-            <button onclick="openGuest()">Open Guest App</button>
+            <button onclick="refreshStatus()" id="refreshBtn">Refresh Status</button>
+            <button onclick="openAdmin()" id="adminBtn">Open Admin Panel</button>
+            <button onclick="openAttendant()" id="attendantBtn">Open Attendant App</button>
+            <button onclick="openGuest()" id="guestBtn">Open Guest App</button>
         </div>
     </div>
 
@@ -93,9 +94,40 @@
             window.open('guest_web_app.html', '_blank');
         }
 
+        // Apply site configuration
+        applySiteConfig();
+        
         // Initial load and auto-refresh every 10 seconds
         fetchStatus();
         setInterval(fetchStatus, 10000);
+
+        // Apply site configuration to UI elements
+        function applySiteConfig() {
+            // Branding
+            document.title = getConfig('brand.name', 'Queue Status Dashboard');
+            
+            // Text content
+            document.getElementById('pageTitle').textContent = getConfig('text.dashboardTitle', 'Queue Status Dashboard');
+            document.getElementById('apiBaseLabel').textContent = getConfig('text.apiBase', 'API Base URL:');
+            document.getElementById('queueStatusLabel').textContent = getConfig('text.queueStatus', 'Queue Status:');
+            document.getElementById('totalGuestsLabel').textContent = getConfig('text.totalGuests', 'Total Guests:');
+            document.getElementById('readyPoolLabel').textContent = getConfig('text.readyPoolStatus', 'Ready Pool:');
+            document.getElementById('venueStatusLabel').textContent = getConfig('text.venueStatus', 'Venue Status:');
+            document.getElementById('guestsInVenueLabel').textContent = getConfig('text.guestsInVenue', 'Guests in Venue:');
+            document.getElementById('currentQueueLabel').textContent = getConfig('text.currentQueue', 'Current Queue');
+            document.getElementById('refreshBtn').textContent = getConfig('text.refreshStatus', 'Refresh Status');
+            document.getElementById('adminBtn').textContent = getConfig('text.openAdmin', 'Open Admin Panel');
+            document.getElementById('attendantBtn').textContent = getConfig('text.openAttendant', 'Open Attendant App');
+            document.getElementById('guestBtn').textContent = getConfig('text.openGuest', 'Open Guest App');
+            
+            // Apply colors if CSS custom properties are supported
+            if (CSS.supports('color', 'var(--custom-property)')) {
+                document.documentElement.style.setProperty('--primary-color', getConfig('colors.primary', '#007bff'));
+                document.documentElement.style.setProperty('--secondary-color', getConfig('colors.secondary', '#6c757d'));
+                document.documentElement.style.setProperty('--success-color', getConfig('colors.success', '#28a745'));
+                document.documentElement.style.setProperty('--danger-color', getConfig('colors.danger', '#dc3545'));
+            }
+        }
     </script>
 </body>
 </html>

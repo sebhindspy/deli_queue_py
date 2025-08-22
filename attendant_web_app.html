@@ -7,27 +7,28 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link rel="stylesheet" href="static/style.css">
     <script src="static/config.js"></script>
+    <script src="static/site_config.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 
 </head>
 
 <body>
     <div class="info">
-        <h1>Venue Entry App</h1>
+        <h1 id="pageTitle">Venue Entry App</h1>
 
         <div id="reader"></div>
         <div id="result"></div>
 
         <div class="status">
-            <p><strong>Venue status:</strong> <span id="venueStatus">Loading...</span></p>
-            <p><strong>Queue status:</strong> <span id="queueStatus">Loading...</span></p>
-            <p><strong>Guests in queue:</strong> <span id="guestCount">0</span></p>
-            <p><strong>Next guest:</strong> <span id="nextGuest">Loading..</span><span id="premiumBadge"></span></p>
-            <p><strong>Ready pool:</strong></p>
+            <p><strong id="venueStatusLabel">Venue status:</strong> <span id="venueStatus">Loading...</span></p>
+            <p><strong id="queueStatusLabel">Queue status:</strong> <span id="queueStatus">Loading...</span></p>
+            <p><strong id="guestCountLabel">Guests in queue:</strong> <span id="guestCount">0</span></p>
+            <p><strong id="nextGuestLabel">Next guest:</strong> <span id="nextGuest">Loading..</span><span id="premiumBadge"></span></p>
+            <p><strong id="readyPoolLabel">Ready pool:</strong></p>
             <ul id="readyPoolList"></ul>
         </div>
 
-        <button id="advanceBtn" onclick="advanceQueue()">Remove guest from queue</button>
+        <button id="advanceBtn" onclick="advanceQueue()"></button>
     </div>
     <script>
         const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
@@ -93,8 +94,34 @@
             }
         }
 
+        // Apply site configuration
+        applySiteConfig();
+        
         fetchStatus();
         setInterval(fetchStatus, 5000);
+
+        // Apply site configuration to UI elements
+        function applySiteConfig() {
+            // Branding
+            document.title = getConfig('brand.name', 'Venue Entry App');
+            
+            // Text content
+            document.getElementById('pageTitle').textContent = getConfig('text.attendantTitle', 'Venue Entry App');
+            document.getElementById('venueStatusLabel').textContent = getConfig('text.venueStatus', 'Venue status:');
+            document.getElementById('queueStatusLabel').textContent = getConfig('text.queueStatus', 'Queue status:');
+            document.getElementById('guestCountLabel').textContent = getConfig('text.guestCount', 'Guests in queue:');
+            document.getElementById('nextGuestLabel').textContent = getConfig('text.nextGuest', 'Next guest:');
+            document.getElementById('readyPoolLabel').textContent = getConfig('text.readyPool', 'Ready pool:');
+            document.getElementById('advanceBtn').textContent = getConfig('text.removeGuest', 'Remove guest from queue');
+            
+            // Apply colors if CSS custom properties are supported
+            if (CSS.supports('color', 'var(--custom-property)')) {
+                document.documentElement.style.setProperty('--primary-color', getConfig('colors.primary', '#007bff'));
+                document.documentElement.style.setProperty('--secondary-color', getConfig('colors.secondary', '#6c757d'));
+                document.documentElement.style.setProperty('--success-color', getConfig('colors.success', '#28a745'));
+                document.documentElement.style.setProperty('--danger-color', getConfig('colors.danger', '#dc3545'));
+            }
+        }
 
         async function onScanSuccess(decodedText, decodedResult) {
             document.getElementById("result").innerText = `Scanned Email: ${decodedText}`;

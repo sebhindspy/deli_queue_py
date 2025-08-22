@@ -6,17 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/style.css">
     <script src="static/config.js"></script>
+    <script src="static/site_config.js"></script>
 </head>
 <body>
     <div class="container">
-        <h2>Mock Payment Page</h2>
+        <h2 id="pageTitle">Mock Payment Page</h2>
 
-        <img src="static/accessoPay.png" style="max-width: -webkit-fill-available"><img/>
+        <img src="" id="paymentLogo" style="max-width: 100%; height: auto;">
 
-        <button onclick="completePayment()">Mock payment complete</button>
+        <button onclick="completePayment()" id="completePaymentBtn">Mock payment complete</button>
     </div>
 
     <script>
+        // Apply site configuration on load
+        document.addEventListener("DOMContentLoaded", function() {
+            applySiteConfig();
+        });
+
         function getEmailFromQuery() {
             const params = new URLSearchParams(window.location.search);
             return params.get("email");
@@ -31,6 +37,26 @@
             }
         }
 
+        // Apply site configuration to UI elements
+        function applySiteConfig() {
+            // Branding
+            document.title = getConfig('brand.name', 'Mock Payment');
+            
+            // Text content
+            document.getElementById('pageTitle').textContent = getConfig('text.paymentTitle', 'Mock Payment Page');
+            document.getElementById('completePaymentBtn').textContent = getConfig('text.paymentComplete', 'Mock payment complete');
+            
+            // Images
+            document.getElementById('paymentLogo').src = getConfig('images.paymentLogo', 'static/accessoPay.png');
+            
+            // Apply colors if CSS custom properties are supported
+            if (CSS.supports('color', 'var(--custom-property)')) {
+                document.documentElement.style.setProperty('--primary-color', getConfig('colors.primary', '#007bff'));
+                document.documentElement.style.setProperty('--secondary-color', getConfig('colors.secondary', '#6c757d'));
+                document.documentElement.style.setProperty('--success-color', getConfig('colors.success', '#28a745'));
+                document.documentElement.style.setProperty('--danger-color', getConfig('colors.danger', '#dc3545'));
+            }
+        }
     </script>
 </body>
 </html>

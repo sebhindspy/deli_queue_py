@@ -6,17 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/style.css">
     <script src="static/config.js"></script>
+    <script src="static/site_config.js"></script>
 </head>
 <body>
     <div class="container">
-        <h2>Venue Exit Clicker</h2>
+        <h2 id="pageTitle">Venue Exit Clicker</h2>
 
         <div class="status">
-            <p><strong>Venue Status:</strong> <span id="venueStatus">Loading...</span></p>
-            <p><strong>Guests in Venue:</strong> <span id="guestsInVenue">0</span></p>
+            <p><strong id="venueStatusLabel">Venue Status:</strong> <span id="venueStatus">Loading...</span></p>
+            <p><strong id="guestsInVenueLabel">Guests in Venue:</strong> <span id="guestsInVenue">0</span></p>
         </div>
 
-        <button onclick="decrementVenue()">Guest Left Venue</button>
+        <button onclick="decrementVenue()" id="decrementBtn">Guest Left Venue</button>
     </div>
 
     <script>
@@ -41,8 +42,31 @@
             }
         }
 
+        // Apply site configuration
+        applySiteConfig();
+        
         fetchVenueStatus();
         setInterval(fetchVenueStatus, 5000);
+
+        // Apply site configuration to UI elements
+        function applySiteConfig() {
+            // Branding
+            document.title = getConfig('brand.name', 'Clicker App');
+            
+            // Text content
+            document.getElementById('pageTitle').textContent = getConfig('text.clickerTitle', 'Venue Exit Clicker');
+            document.getElementById('venueStatusLabel').textContent = getConfig('text.venueStatus', 'Venue Status:');
+            document.getElementById('guestsInVenueLabel').textContent = getConfig('text.guestsInVenue', 'Guests in Venue:');
+            document.getElementById('decrementBtn').textContent = getConfig('text.guestLeft', 'Guest Left Venue');
+            
+            // Apply colors if CSS custom properties are supported
+            if (CSS.supports('color', 'var(--custom-property)')) {
+                document.documentElement.style.setProperty('--primary-color', getConfig('colors.primary', '#007bff'));
+                document.documentElement.style.setProperty('--secondary-color', getConfig('colors.secondary', '#6c757d'));
+                document.documentElement.style.setProperty('--success-color', getConfig('colors.success', '#28a745'));
+                document.documentElement.style.setProperty('--danger-color', getConfig('colors.danger', '#dc3545'));
+            }
+        }
     </script>
 </body>
 </html>

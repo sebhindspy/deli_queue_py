@@ -62,7 +62,15 @@ window.SITE_CONFIG = {
         venueStatus: "Venue Status:",
         guestsInVenue: "Guests in Venue:",
         currentQueue: "Current Queue",
-        noGuests: "No guests in queue"
+        noGuests: "No guests in queue",
+        refreshStatus: "Refresh Status",
+        openAdmin: "Open Admin Panel",
+        openAttendant: "Open Attendant App",
+        openGuest: "Open Guest App",
+        
+        // Clicker App
+        clickerTitle: "Venue Exit Clicker",
+        guestLeft: "Guest Left Venue"
     },
 
     // Features

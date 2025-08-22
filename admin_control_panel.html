@@ -7,18 +7,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/style.css">
     <script src="static/config.js"></script>
+    <script src="static/site_config.js"></script>
 </head>
 
 <body>
     <div class="container">
-        <h2>Admin Control Panel</h2>
+        <h2 id="pageTitle">Admin Control Panel</h2>
         <div class="status">
-            <p><strong>Queue status:</strong> <span id="queueStatus">Loading...</span></p>
-            <p><strong>Ready pool:</strong> <span id="readyPoolLimit">Disabled</span></p>
-            <p><strong>Guests in queue:</strong> <span id="guestCount">0</span></p>
-            <p><strong>Guests in venue:</strong> <span id="guestsInVenue">Loading...</span></p>
-            <p><strong>Premium limit:</strong> <span id="premiumLimit">Loading...</span></p>
-            <p><strong>One Shot price:</strong> $<span id="oneShotPrice">Loading...</span></p>
+            <p><strong id="queueStatusLabel">Queue status:</strong> <span id="queueStatus">Loading...</span></p>
+            <p><strong id="readyPoolLabel">Ready pool:</strong> <span id="readyPoolLimit">Disabled</span></p>
+            <p><strong id="guestCountLabel">Guests in queue:</strong> <span id="guestCount">0</span></p>
+            <p><strong id="venueStatusLabel">Guests in venue:</strong> <span id="guestsInVenue">Loading...</span></p>
+            <p><strong id="premiumLimitLabel">Premium limit:</strong> <span id="premiumLimit">Loading...</span></p>
+            <p><strong id="oneShotPriceLabel">One Shot price:</strong> $<span id="oneShotPrice">Loading...</span></p>
         </div>
         <button onclick="openQueue()">Open Queue</button>
         <button onclick="closeQueue()">Close Queue</button>
@@ -26,14 +27,14 @@
 
         <hr>
 
-        <h3>Demo mode</h3>
+        <h3 id="demoModeLabel">Demo mode</h3>
 
         <input type="number" id="mockCount" placeholder="Number of mock guests">
         <button onclick="mockGuests()">Insert Mock Guests</button>
 
         <hr>
 
-        <h3>Premium access</h3>
+        <h3 id="premiumAccessLabel">Premium access</h3>
 
         <input type="number" id="premiumLimitInput" placeholder="Set Premium Limit">
         <button onclick="setPremiumLimit()">Update Premium Limit</button>
@@ -43,11 +44,11 @@
 
         <hr>
 
-        <h3>Venue management</h3>
+        <h3 id="venueManagementLabel">Venue management</h3>
 
         <label>
             <input type="checkbox" id="venueModeToggle" onchange="toggleVenueMode()">
-            Enable Venue Mode
+            <span id="enableVenueModeLabel">Enable Venue Mode</span>
         </label>
 
         <br><br>
@@ -57,8 +58,8 @@
 
         <hr>
 
-        <h3>Ready pool</h3>
-        <p><strong>Current ready pool:</strong> <span id="readyPoolLimit">Disabled</span></p>
+        <h3 id="readyPoolLabel">Ready pool</h3>
+        <p><strong id="currentReadyPoolLabel">Current ready pool:</strong> <span id="readyPoolLimit">Disabled</span></p>
         <input type="number" id="readyPoolLimitInput" placeholder="Set Ready Pool Size (0 to disable)">
         <button onclick="setReadyPoolLimit()">Update Ready Pool</button>
 
@@ -169,8 +170,34 @@
         }
 
 
+        // Apply site configuration
+        applySiteConfig();
+        
         fetchStatus();
         setInterval(fetchStatus, 5000);
+
+        // Apply site configuration to UI elements
+        function applySiteConfig() {
+            // Branding
+            document.title = getConfig('brand.name', 'Admin Control Panel');
+            
+            // Text content
+            document.getElementById('pageTitle').textContent = getConfig('text.adminTitle', 'Admin Control Panel');
+            document.getElementById('queueStatusLabel').textContent = getConfig('text.queueStatus', 'Queue status:');
+            document.getElementById('readyPoolLabel').textContent = getConfig('text.readyPool', 'Ready pool:');
+            document.getElementById('guestCountLabel').textContent = getConfig('text.guestCount', 'Guests in queue:');
+            document.getElementById('venueStatusLabel').textContent = getConfig('text.venueStatus', 'Guests in venue:');
+            document.getElementById('premiumLimitLabel').textContent = getConfig('text.premiumLimit', 'Premium limit:');
+            document.getElementById('oneShotPriceLabel').textContent = getConfig('text.oneShotPrice', 'One Shot price:');
+            
+            // Apply colors if CSS custom properties are supported
+            if (CSS.supports('color', 'var(--custom-property)')) {
+                document.documentElement.style.setProperty('--primary-color', getConfig('colors.primary', '#007bff'));
+                document.documentElement.style.setProperty('--secondary-color', getConfig('colors.secondary', '#6c757d'));
+                document.documentElement.style.setProperty('--success-color', getConfig('colors.success', '#28a745'));
+                document.documentElement.style.setProperty('--danger-color', getConfig('colors.danger', '#dc3545'));
+            }
+        }
     </script>
 </body>
 

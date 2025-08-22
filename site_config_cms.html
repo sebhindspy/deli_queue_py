@@ -192,6 +192,12 @@
     </div>
 
     <script>
+        // Helper function to construct API URLs
+        function api(endpoint) {
+            const base = window.API_BASE || '';
+            return base + endpoint;
+        }
+        
         let currentConfig = {};
         let defaultConfig = {};
         let availableConfigs = ['default'];

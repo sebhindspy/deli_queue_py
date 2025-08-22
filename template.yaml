@@ -72,6 +72,7 @@ Resources:
           APP_ID: !Ref AppId
           DDB_TABLE_NAME: !If [UseDynamoDB, !Ref QueueTable, ""]
           CORS_ORIGINS: "*"
+          S3_BUCKET_NAME: !Ref S3Bucket
       Policies:
         - AWSLambdaBasicExecutionRole
         - S3CrudPolicy:
@@ -91,6 +92,9 @@ Outputs:
   ApiUrl:
     Description: Invoke URL for your API
     Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
+  S3Bucket:
+    Description: S3 bucket name for static files and configs
+    Value: !Ref S3Bucket
   DynamoDBTable:
     Condition: UseDynamoDB
     Value: !Ref QueueTable

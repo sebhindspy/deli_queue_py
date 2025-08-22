@@ -45,8 +45,8 @@ jobs:
           sam delete --stack-name deli-queue --no-prompts || true
           # Wait a moment for deletion to complete
           sleep 10
-          # Deploy fresh stack
-          sam deploy --no-confirm-changeset --stack-name deli-queue --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=true | cat
+          # Deploy fresh stack using existing S3 bucket
+          sam deploy --no-confirm-changeset --stack-name deli-queue --s3-bucket deli-queue-static --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=true | cat
 
       - name: Get API URL
         id: get_api

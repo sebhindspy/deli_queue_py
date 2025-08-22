@@ -80,12 +80,15 @@
         
         .control-group {
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
         }
         
         .control-group label {
             display: inline-block;
             width: 120px;
             font-weight: 600;
+            flex-shrink: 0;
         }
         
         .control-group select,
@@ -94,6 +97,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             margin-left: 10px;
+            width: 200px;
         }
         
         .control-group button {
@@ -104,6 +108,7 @@
             border-radius: 4px;
             cursor: pointer;
             margin-left: 10px;
+            white-space: nowrap;
         }
         
         .control-group button:hover {
@@ -117,17 +122,7 @@
             color: #495057;
         }
         
-        .json-preview {
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 15px;
-            margin: 20px 0;
-            font-family: monospace;
-            white-space: pre-wrap;
-            max-height: 300px;
-            overflow-y: auto;
-        }
+
         
         .status-message {
             padding: 10px;
@@ -171,10 +166,7 @@
         
         <div id="statusMessage"></div>
         
-        <div class="json-preview">
-            <strong>Current Configuration Preview:</strong>
-            <div id="configPreview"></div>
-        </div>
+
         
         <table class="config-table">
             <thead>
@@ -202,7 +194,6 @@
             loadDefaultConfig();
             loadAvailableConfigs();
             generateConfigTable();
-            updateConfigPreview();
         });
 
         // Load the default configuration
@@ -307,7 +298,6 @@
         // Update configuration value
         function updateConfigValue(path, value) {
             setNestedValue(currentConfig, path, value);
-            updateConfigPreview();
             showStatus('Configuration updated', 'success');
         }
 
@@ -377,7 +367,6 @@ window.getConfig = function(path, defaultValue = '') {
             }
             
             generateConfigTable();
-            updateConfigPreview();
             showStatus(`Configuration loaded: ${selectedConfig}`, 'success');
         }
 
@@ -406,15 +395,10 @@ window.getConfig = function(path, defaultValue = '') {
         function resetToDefault() {
             currentConfig = JSON.parse(JSON.stringify(defaultConfig));
             generateConfigTable();
-            updateConfigPreview();
             showStatus('Configuration reset to default', 'success');
         }
 
-        // Update configuration preview
-        function updateConfigPreview() {
-            const preview = document.getElementById('configPreview');
-            preview.textContent = JSON.stringify(currentConfig, null, 2);
-        }
+
 
         // Show status message
         function showStatus(message, type) {

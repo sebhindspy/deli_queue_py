@@ -28,7 +28,7 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "deli-queue-${AWS::StackName}-${AWS::StackId}-${AWS::Region}"
+      BucketName: !Sub "deli-queue-${AWS::StackName}-${AWS::Region}-${AWS::AccountId}"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -98,6 +98,5 @@ Outputs:
   DynamoDBTable:
     Condition: UseDynamoDB
     Value: !Ref QueueTable
-    Description: DynamoDB table name for queue state
 
 

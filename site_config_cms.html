@@ -86,7 +86,7 @@
         
         .control-group label {
             display: inline-block;
-            width: 120px;
+            width: 160px;
             font-weight: 600;
             flex-shrink: 0;
         }
@@ -97,7 +97,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             margin-left: 10px;
-            width: 200px;
+            width: 240px !important;
         }
         
         .control-group button {
@@ -107,8 +107,9 @@
             padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
-            margin-left: 10px;
+            margin-left: auto;
             white-space: nowrap;
+            width: 240px !important;
         }
         
         .control-group button:hover {
@@ -160,7 +161,7 @@
                     <option value="default">Default Configuration</option>
                 </select>
                 <button onclick="applyConfig()">Apply Selected Config</button>
-                <button onclick="resetToDefault()">Reset to Default</button>
+                <!-- <button onclick="resetToDefault()">Reset to Default</button> -->
             </div>
         </div>
         

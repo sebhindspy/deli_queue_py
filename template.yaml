@@ -28,7 +28,7 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "deli-queue-static-${AWS::AccountId}-${AWS::Region}"
+      BucketName: !Sub "deli-queue-${AWS::StackName}-${AWS::StackId}-${AWS::Region}"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true

@@ -230,6 +230,9 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             (async function () {
+                // Load customer configuration first
+                await loadCustomerConfig();
+                
                 // Apply site configuration
                 applySiteConfig();
                 
@@ -245,6 +248,29 @@
                 }
             })();
         });
+
+        // Load customer configuration if available
+        async function loadCustomerConfig() {
+            try {
+                // Check if there's a customer config in localStorage
+                const customerConfigs = Object.keys(localStorage).filter(key => key.endsWith('_config.js'));
+                if (customerConfigs.length > 0) {
+                    // Load the first available customer config
+                    const customerName = customerConfigs[0].replace('_config.js', '');
+                    const configContent = localStorage.getItem(customerConfigs[0]);
+                    
+                    // Extract and apply the SITE_CONFIG
+                    const configMatch = configContent.match(/window\.SITE_CONFIG\s*=\s*({[\s\S]*?});/);
+                    if (configMatch) {
+                        const customerConfig = JSON.parse(configMatch[1]);
+                        window.SITE_CONFIG = customerConfig;
+                        console.log(`Loaded customer configuration: ${customerName}`);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading customer config:', error);
+            }
+        }
 
         // Apply site configuration to UI elements
         function applySiteConfig() {

@@ -442,13 +442,25 @@ window.getConfig = function(path, defaultValue = '') {
             if (selectedConfig === 'default') {
                 // Apply default config
                 window.SITE_CONFIG = JSON.parse(JSON.stringify(defaultConfig));
+                showStatus(`Default configuration applied`, 'success');
             } else {
                 try {
                     const savedConfig = localStorage.getItem(`${selectedConfig}_config.js`);
                     if (savedConfig) {
-                        // In a real implementation, this would update the actual site_config.js
-                        // For now, we'll just show a message
-                        showStatus(`Configuration ${selectedConfig} applied (refresh page to see changes)`, 'success');
+                        // Extract and apply the SITE_CONFIG
+                        const configMatch = savedConfig.match(/window\.SITE_CONFIG\s*=\s*({[\s\S]*?});/);
+                        if (configMatch) {
+                            const customerConfig = JSON.parse(configMatch[1]);
+                            window.SITE_CONFIG = customerConfig;
+                            showStatus(`Configuration ${selectedConfig} applied successfully`, 'success');
+                            
+                            // Trigger a custom event to notify other pages
+                            window.dispatchEvent(new CustomEvent('siteConfigChanged', {
+                                detail: { config: customerConfig, name: selectedConfig }
+                            }));
+                        } else {
+                            throw new Error('Invalid configuration format');
+                        }
                     }
                 } catch (error) {
                     showStatus(`Error applying configuration: ${error.message}`, 'error');

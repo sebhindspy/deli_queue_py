@@ -1,15 +1,25 @@
 
+:root {
+    --primary-color: #007bff;
+    --primary-hover: #0056b3;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --background-color: #ffffff;
+    --text-color: #212529;
+}
+
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
+    background-color: var(--background-color, #f4f4f4);
+    color: var(--text-color, #333);
     margin: 16px;
 }
 
 .container {
     max-width: 480px;
     margin: auto;
-    background: white;
+    background: var(--background-color, white);
     padding: 16px;
     border-radius: 16px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -56,27 +66,27 @@ button {
     margin: 0.5rem 0;
     font-size: 1em;
     cursor: pointer;
-    background-color: #007bff;
+    background-color: var(--primary-color, #007bff);
     color: white;
     border-radius: 8px;
     border: none;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: var(--primary-hover, #0056b3);
 }
 
 button:disabled {
-    background-color: #aaa;
+    background-color: var(--secondary-color, #aaa);
 }
 
 .leave {
-    background-color: #e74c3c;
+    background-color: var(--danger-color, #e74c3c);
     color: white;
 }
 
 .premium-badge {
-    background-color: gold;
+    background-color: var(--success-color, gold);
     color: black;
     font-weight: bold;
     padding: 0.2em 0.5em;

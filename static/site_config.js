@@ -70,7 +70,11 @@ window.SITE_CONFIG = {
         
         // Clicker App
         clickerTitle: "Venue Exit Clicker",
-        guestLeft: "Guest Left Venue"
+        guestLeft: "Guest Left Venue",
+        
+        // Admin Panel Additional
+        siteConfigurationLabel: "Site Configuration",
+        openCMSBtn: "Open Configuration CMS"
     },
 
     // Features

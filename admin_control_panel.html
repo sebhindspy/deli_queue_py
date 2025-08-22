@@ -63,6 +63,12 @@
         <input type="number" id="readyPoolLimitInput" placeholder="Set Ready Pool Size (0 to disable)">
         <button onclick="setReadyPoolLimit()">Update Ready Pool</button>
 
+        <hr>
+
+        <h3 id="siteConfigurationLabel">Site Configuration</h3>
+        <p>Customize branding, colors, and text for different customers.</p>
+        <button onclick="openSiteConfigCMS()" id="openCMSBtn">Open Configuration CMS</button>
+
     </div>
 
     <script>
@@ -169,6 +175,10 @@
             }
         }
 
+        function openSiteConfigCMS() {
+            window.open('site_config_cms.html', '_blank');
+        }
+
 
         // Apply site configuration
         applySiteConfig();
@@ -189,6 +199,8 @@
             document.getElementById('venueStatusLabel').textContent = getConfig('text.venueStatus', 'Guests in venue:');
             document.getElementById('premiumLimitLabel').textContent = getConfig('text.premiumLimit', 'Premium limit:');
             document.getElementById('oneShotPriceLabel').textContent = getConfig('text.oneShotPrice', 'One Shot price:');
+            document.getElementById('siteConfigurationLabel').textContent = getConfig('text.siteConfigurationLabel', 'Site Configuration');
+            document.getElementById('openCMSBtn').textContent = getConfig('text.openCMSBtn', 'Open Configuration CMS');
             
             // Apply colors if CSS custom properties are supported
             if (CSS.supports('color', 'var(--custom-property)')) {

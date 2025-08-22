@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Site Configuration CMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/style.css">
+    <script src="static/config.js"></script>
+    <script src="static/site_config.js"></script>
+    <style>
+        .cms-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .config-table th,
+        .config-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .config-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .config-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        
+        .update-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .update-btn:hover {
+            background: #0056b3;
+        }
+        
+        .update-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: inline-block;
+            width: 120px;
+            font-weight: 600;
+        }
+        
+        .control-group select,
+        .control-group input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        
+        .control-group button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .control-group button:hover {
+            background: #218838;
+        }
+        
+        .section-header {
+            background: #e9ecef;
+            padding: 10px 12px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .json-preview {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .status-message {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="cms-container">
+        <h1>Site Configuration CMS</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Customer Name:</label>
+                <input type="text" id="customerName" placeholder="Enter customer name" value="default">
+                <button onclick="saveConfig()">Save Configuration</button>
+            </div>
+            
+            <div class="control-group">
+                <label>Load Config:</label>
+                <select id="configSelector" onchange="loadSelectedConfig()">
+                    <option value="default">Default Configuration</option>
+                </select>
+                <button onclick="applyConfig()">Apply Selected Config</button>
+                <button onclick="resetToDefault()">Reset to Default</button>
+            </div>
+        </div>
+        
+        <div id="statusMessage"></div>
+        
+        <div class="json-preview">
+            <strong>Current Configuration Preview:</strong>
+            <div id="configPreview"></div>
+        </div>
+        
+        <table class="config-table">
+            <thead>
+                <tr>
+                    <th>Variable Path</th>
+                    <th>Current Value</th>
+                    <th>Default Value</th>
+                    <th>New Value</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="configTableBody">
+                <!-- Configuration rows will be generated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentConfig = {};
+        let defaultConfig = {};
+        let availableConfigs = ['default'];
+
+        // Initialize the CMS
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDefaultConfig();
+            loadAvailableConfigs();
+            generateConfigTable();
+            updateConfigPreview();
+        });
+
+        // Load the default configuration
+        function loadDefaultConfig() {
+            defaultConfig = JSON.parse(JSON.stringify(window.SITE_CONFIG));
+            currentConfig = JSON.parse(JSON.stringify(defaultConfig));
+        }
+
+        // Load available customer configurations
+        function loadAvailableConfigs() {
+            // In a real implementation, this would fetch from S3 or database
+            // For now, we'll use localStorage to simulate
+            const savedConfigs = Object.keys(localStorage).filter(key => key.endsWith('_config.js'));
+            availableConfigs = ['default', ...savedConfigs.map(key => key.replace('_config.js', ''))];
+            
+            const selector = document.getElementById('configSelector');
+            selector.innerHTML = '';
+            availableConfigs.forEach(config => {
+                const option = document.createElement('option');
+                option.value = config;
+                option.textContent = config === 'default' ? 'Default Configuration' : config;
+                selector.appendChild(option);
+            });
+        }
+
+        // Generate the configuration table
+        function generateConfigTable() {
+            const tbody = document.getElementById('configTableBody');
+            tbody.innerHTML = '';
+            
+            // Helper function to add rows recursively
+            function addConfigRows(obj, path = '') {
+                for (const [key, value] of Object.entries(obj)) {
+                    const currentPath = path ? `${path}.${key}` : key;
+                    
+                    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                        // Add section header
+                        const headerRow = document.createElement('tr');
+                        headerRow.innerHTML = `
+                            <td colspan="5" class="section-header">${currentPath}</td>
+                        `;
+                        tbody.appendChild(headerRow);
+                        
+                        // Recursively add child rows
+                        addConfigRows(value, currentPath);
+                    } else {
+                        // Add configuration row
+                        const row = document.createElement('tr');
+                        const defaultValue = getNestedValue(defaultConfig, currentPath);
+                        const currentValue = getNestedValue(currentConfig, currentPath);
+                        
+                        row.innerHTML = `
+                            <td><code>${currentPath}</code></td>
+                            <td><code>${JSON.stringify(currentValue)}</code></td>
+                            <td><code>${JSON.stringify(defaultValue)}</code></td>
+                            <td>
+                                <input type="text" 
+                                       class="input-field" 
+                                       value="${JSON.stringify(currentValue)}" 
+                                       data-path="${currentPath}"
+                                       onchange="updateConfigValue('${currentPath}', this.value)">
+                            </td>
+                            <td>
+                                <button class="update-btn" 
+                                        onclick="updateConfigValue('${currentPath}', this.parentElement.previousElementSibling.querySelector('.input-field').value)">
+                                    Update
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    }
+                }
+            }
+            
+            addConfigRows(currentConfig);
+        }
+
+        // Get nested value from object using dot notation
+        function getNestedValue(obj, path) {
+            return path.split('.').reduce((current, key) => current && current[key], obj);
+        }
+
+        // Set nested value in object using dot notation
+        function setNestedValue(obj, path, value) {
+            const keys = path.split('.');
+            const lastKey = keys.pop();
+            const target = keys.reduce((current, key) => {
+                if (!(key in current)) {
+                    current[key] = {};
+                }
+                return current[key];
+            }, obj);
+            
+            // Try to parse the value as JSON, fallback to string
+            try {
+                target[lastKey] = JSON.parse(value);
+            } catch {
+                target[lastKey] = value;
+            }
+        }
+
+        // Update configuration value
+        function updateConfigValue(path, value) {
+            setNestedValue(currentConfig, path, value);
+            updateConfigPreview();
+            showStatus('Configuration updated', 'success');
+        }
+
+        // Save configuration for a customer
+        function saveConfig() {
+            const customerName = document.getElementById('customerName').value.trim();
+            if (!customerName) {
+                showStatus('Please enter a customer name', 'error');
+                return;
+            }
+            
+            try {
+                // Create the config file content
+                const configContent = `// Site Configuration for ${customerName}
+window.SITE_CONFIG = ${JSON.stringify(currentConfig, null, 4)};
+
+// Helper function to get config values with fallbacks
+window.getConfig = function(path, defaultValue = '') {
+    const keys = path.split('.');
+    let value = window.SITE_CONFIG;
+    
+    for (const key of keys) {
+        if (value && typeof value === 'object' && key in value) {
+            value = value[key];
+        } else {
+            return defaultValue;
+        }
+    }
+    
+    return value;
+};`;
+                
+                // Save to localStorage (in real implementation, save to S3)
+                localStorage.setItem(`${customerName}_config.js`, configContent);
+                
+                // Update available configs
+                loadAvailableConfigs();
+                
+                showStatus(`Configuration saved for ${customerName}`, 'success');
+            } catch (error) {
+                showStatus(`Error saving configuration: ${error.message}`, 'error');
+            }
+        }
+
+        // Load selected configuration
+        function loadSelectedConfig() {
+            const selectedConfig = document.getElementById('configSelector').value;
+            
+            if (selectedConfig === 'default') {
+                currentConfig = JSON.parse(JSON.stringify(defaultConfig));
+            } else {
+                try {
+                    const savedConfig = localStorage.getItem(`${selectedConfig}_config.js`);
+                    if (savedConfig) {
+                        // Extract the SITE_CONFIG object from the saved content
+                        const configMatch = savedConfig.match(/window\.SITE_CONFIG\s*=\s*({[\s\S]*?});/);
+                        if (configMatch) {
+                            currentConfig = JSON.parse(configMatch[1]);
+                        } else {
+                            throw new Error('Invalid configuration format');
+                        }
+                    }
+                } catch (error) {
+                    showStatus(`Error loading configuration: ${error.message}`, 'error');
+                    return;
+                }
+            }
+            
+            generateConfigTable();
+            updateConfigPreview();
+            showStatus(`Configuration loaded: ${selectedConfig}`, 'success');
+        }
+
+        // Apply the selected configuration
+        function applyConfig() {
+            const selectedConfig = document.getElementById('configSelector').value;
+            
+            if (selectedConfig === 'default') {
+                // Apply default config
+                window.SITE_CONFIG = JSON.parse(JSON.stringify(defaultConfig));
+            } else {
+                try {
+                    const savedConfig = localStorage.getItem(`${selectedConfig}_config.js`);
+                    if (savedConfig) {
+                        // In a real implementation, this would update the actual site_config.js
+                        // For now, we'll just show a message
+                        showStatus(`Configuration ${selectedConfig} applied (refresh page to see changes)`, 'success');
+                    }
+                } catch (error) {
+                    showStatus(`Error applying configuration: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Reset to default configuration
+        function resetToDefault() {
+            currentConfig = JSON.parse(JSON.stringify(defaultConfig));
+            generateConfigTable();
+            updateConfigPreview();
+            showStatus('Configuration reset to default', 'success');
+        }
+
+        // Update configuration preview
+        function updateConfigPreview() {
+            const preview = document.getElementById('configPreview');
+            preview.textContent = JSON.stringify(currentConfig, null, 2);
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+            
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

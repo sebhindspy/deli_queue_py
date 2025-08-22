@@ -41,12 +41,12 @@ jobs:
 
       - name: Deploy API
         run: |
-          # Try to delete existing failed stack first
-          sam delete --stack-name deli-queue --no-prompts || true
+          # Try to delete existing failed stack first, but don't fail if it can't
+          sam delete --stack-name deli-queue --no-prompts --region ${{ secrets.AWS_REGION }} || echo "Stack deletion failed, continuing with deployment"
           # Wait a moment for deletion to complete
-          sleep 10
+          sleep 15
           # Deploy fresh stack using existing S3 bucket
-          sam deploy --no-confirm-changeset --stack-name deli-queue --s3-bucket deli-queue-static --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=true | cat
+          sam deploy --no-confirm-changeset --stack-name deli-queue --s3-bucket deli-queue-static --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=true --region ${{ secrets.AWS_REGION }} | cat
 
       - name: Get API URL
         id: get_api

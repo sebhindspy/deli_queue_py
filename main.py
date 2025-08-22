@@ -124,5 +124,94 @@ async def scan_guest(request: Request):
     return {"message": "Guest scanned and removed from queue"}
 
 
+@app.post("/upload-config")
+async def upload_config(request: Request):
+    """Upload customer configuration to S3"""
+    try:
+        data = await request.json()
+        customer_name = data.get("customerName")
+        config_content = data.get("configContent")
+
+        if not customer_name or not config_content:
+            raise HTTPException(
+                status_code=400, detail="Missing customerName or configContent"
+            )
+
+        # Upload to S3
+        import boto3
+
+        s3_client = boto3.client("s3")
+        bucket_name = os.environ.get("S3_BUCKET_NAME", "deli-queue-static")
+
+        s3_client.put_object(
+            Bucket=bucket_name,
+            Key=f"configs/{customer_name}_config.js",
+            Body=config_content,
+            ContentType="application/javascript",
+            CacheControl="no-cache",
+        )
+
+        return {"message": f"Configuration uploaded to S3 for {customer_name}"}
+
+    except Exception as e:
+        print(f"Error uploading config to S3: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to upload config: {str(e)}"
+        )
+
+
+@app.get("/list-configs")
+async def list_configs():
+    """List available customer configurations from S3"""
+    try:
+        import boto3
+
+        s3_client = boto3.client("s3")
+        bucket_name = os.environ.get("S3_BUCKET_NAME", "deli-queue-static")
+
+        # List objects with configs/ prefix
+        response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix="configs/")
+
+        configs = []
+        if "Contents" in response:
+            for obj in response["Contents"]:
+                # Extract customer name from key (e.g., "configs/customer1_config.js" -> "customer1")
+                key = obj["Key"]
+                if key.endswith("_config.js"):
+                    customer_name = key.replace("configs/", "").replace(
+                        "_config.js", ""
+                    )
+                    configs.append(customer_name)
+
+        return {"configs": configs}
+
+    except Exception as e:
+        print(f"Error listing configs from S3: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to list configs: {str(e)}")
+
+
+@app.get("/download-config/{customer_name}")
+async def download_config(customer_name: str):
+    """Download customer configuration from S3"""
+    try:
+        import boto3
+
+        s3_client = boto3.client("s3")
+        bucket_name = os.environ.get("S3_BUCKET_NAME", "deli-queue-static")
+
+        response = s3_client.get_object(
+            Bucket=bucket_name, Key=f"configs/{customer_name}_config.js"
+        )
+
+        config_content = response["Body"].read().decode("utf-8")
+        return {"configContent": config_content}
+
+    except Exception as e:
+        print(f"Error downloading config from S3: {str(e)}")
+        raise HTTPException(
+            status_code=404, detail=f"Configuration not found for {customer_name}"
+        )
+
+
 # AWS Lambda handler for API Gateway
 handler = Mangum(app)

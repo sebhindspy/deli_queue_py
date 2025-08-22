@@ -25,6 +25,22 @@ Conditions:
   UseDynamoDB: !Equals [!Ref EnableDynamoDB, "true"]
 
 Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "deli-queue-static-${AWS::AccountId}-${AWS::Region}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ["*"]
+            AllowedMethods: [GET, HEAD]
+            AllowedOrigins: ["*"]
+            MaxAge: 3000
+
   QueueTable:
     Type: AWS::DynamoDB::Table
     Condition: UseDynamoDB
@@ -58,6 +74,8 @@ Resources:
           CORS_ORIGINS: "*"
       Policies:
         - AWSLambdaBasicExecutionRole
+        - S3CrudPolicy:
+            BucketName: !Ref S3Bucket
         - !If
           - UseDynamoDB
           - DynamoDBCrudPolicy:

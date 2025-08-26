@@ -1,7 +1,9 @@
 from pydantic import BaseModel, EmailStr
 
+
 class Guest(BaseModel):
-    email: EmailStr
+    email: str  # Using str instead of EmailStr for better compatibility
+
 
 class QueueStatus(BaseModel):
     is_open: bool

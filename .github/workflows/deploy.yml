@@ -45,7 +45,7 @@ jobs:
           sam delete --stack-name deli-queue --no-prompts --region ${{ secrets.AWS_REGION }} || echo "Stack deletion failed, continuing with deployment"
           # Wait a moment for deletion to complete
           sleep 15
-          # Deploy fresh stack using existing S3 bucket
+          # Deploy fresh stack using existing S3 bucket for deployment artifacts
           sam deploy --no-confirm-changeset --stack-name deli-queue --s3-bucket deli-queue-static --capabilities CAPABILITY_IAM --parameter-overrides StageName=prod EnableDynamoDB=true --region ${{ secrets.AWS_REGION }} | cat
 
       - name: Get API URL
@@ -62,8 +62,8 @@ jobs:
           cp guest_web_app.html dist/
           cp payment_mock.html dist/
           cp status_dashboard.html dist/
-          cp payment_mock.html dist/
           cp site_config_cms.html dist/
+          cp unified_control_app.html dist/
           echo "window.API_BASE='${{ steps.get_api.outputs.API_URL }}'" > dist/static/config.js
           # Copy site config (can be customized per customer)
           cp static/site_config.js dist/static/

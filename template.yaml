@@ -20,28 +20,15 @@ Parameters:
     Type: String
     AllowedValues: ["true", "false"]
     Default: "false"
+  S3BucketName:
+    Type: String
+    Default: "deli-queue-static"
+    Description: "Name of existing S3 bucket for static files"
 
 Conditions:
   UseDynamoDB: !Equals [!Ref EnableDynamoDB, "true"]
 
 Resources:
-  S3Bucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      BucketName: !Sub "deli-queue-${AWS::StackName}-${AWS::Region}-${AWS::AccountId}"
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      CorsConfiguration:
-        CorsRules:
-          - AllowedHeaders: ["*"]
-            AllowedMethods: [GET, HEAD]
-            AllowedOrigins: ["*"]
-            MaxAge: 3000
-
   QueueTable:
     Type: AWS::DynamoDB::Table
     Condition: UseDynamoDB
@@ -73,11 +60,11 @@ Resources:
           APP_ID: !Ref AppId
           DDB_TABLE_NAME: !If [UseDynamoDB, !Ref QueueTable, ""]
           CORS_ORIGINS: "*"
-          S3_BUCKET_NAME: !Ref S3Bucket
+          S3_BUCKET_NAME: !Ref S3BucketName
       Policies:
         - AWSLambdaBasicExecutionRole
         - S3CrudPolicy:
-            BucketName: !Ref S3Bucket
+            BucketName: !Ref S3BucketName
         - !If
           - UseDynamoDB
           - DynamoDBCrudPolicy:
@@ -95,7 +82,7 @@ Outputs:
     Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
   S3Bucket:
     Description: S3 bucket name for static files and configs
-    Value: !Ref S3Bucket
+    Value: !Ref S3BucketName
   DynamoDBTable:
     Condition: UseDynamoDB
     Value: !Ref QueueTable

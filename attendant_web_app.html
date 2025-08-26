@@ -39,7 +39,8 @@
                 const response = await fetch(api('/status'));
                 const data = await response.json();
 
-                document.getElementById('guestCount').textContent = data.queue.length;           
+                // Fix: Use data.queue.length instead of data.queue.length
+                document.getElementById('guestCount').textContent = data.queue ? data.queue.length : 0;           
                 document.getElementById('queueStatus').textContent = data.is_open ? 'Open' : 'Closed';
 
                 const isFull = data.venue_mode_enabled && data.guests_in_venue >= data.venue_capacity;
@@ -49,7 +50,7 @@
 
                 const readyPool = Array.isArray(data.ready_pool) ? data.ready_pool : [];
 
-                if (data.queue.length > 0 && !isFull) {
+                if (data.queue && data.queue.length > 0 && !isFull) {
                     const nextGuest = readyPool.length > 0 ? readyPool[0] : data.queue[0];
                     const email = typeof nextGuest === 'object' && nextGuest.email ? nextGuest.email : String(nextGuest);
                     const isPremium = typeof nextGuest === 'object' && nextGuest.premium;
@@ -75,6 +76,11 @@
                 });
             } catch (error) {
                 console.error('Error fetching status:', error);
+                // Set default values on error
+                document.getElementById('guestCount').textContent = 'Error';
+                document.getElementById('queueStatus').textContent = 'Error';
+                document.getElementById('venueStatus').textContent = 'Error';
+                document.getElementById('nextGuest').textContent = 'Error';
             }
         }
 
@@ -91,6 +97,7 @@
                 }
             } catch (error) {
                 console.error('Error advancing queue:', error);
+                alert("Network error occurred while advancing queue.");
             }
         }
 
@@ -127,28 +134,45 @@
             document.getElementById("result").innerText = `Scanned Email: ${decodedText}`;
 
             try {
-                const response = await fetch(api('/scan'), { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: decodedText }) });
+                const response = await fetch(api('/scan'), { 
+                    method: "POST", 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ email: decodedText }) 
+                });
+                
                 if (response.ok) {
-                    document.getElementById("result").innerText = "Guest scanned";
+                    document.getElementById("result").innerText = "Guest scanned successfully";
+                    // Refresh status after successful scan
+                    fetchStatus();
                 } else {
                     const error = await response.json();
-                    alert(error.detail || "Failed to scan guest.");
+                    document.getElementById("result").innerText = `Scan failed: ${error.detail || "Unknown error"}`;
                 }
             } catch (err) {
-                console.error("Error scanning guest:");
-                alert("An error occurred while processing the scan.");
+                console.error("Error scanning guest:", err);
+                document.getElementById("result").innerText = "Network error occurred";
             }
 
             setTimeout(() => {
                 document.getElementById("result").innerText = "";
-            }, 2000);
+            }, 3000);
 
-            html5QrcodeScanner.clear();
+            // Clear the scanner
+            if (window.html5QrcodeScanner) {
+                window.html5QrcodeScanner.clear();
+            }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-            scanner.render(onScanSuccess);
+            try {
+                const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+                scanner.render(onScanSuccess);
+                // Store scanner reference globally for cleanup
+                window.html5QrcodeScanner = scanner;
+            } catch (error) {
+                console.error("Error initializing QR scanner:", error);
+                document.getElementById("reader").innerHTML = "<p>Error initializing QR scanner. Please refresh the page.</p>";
+            }
         });
 
 

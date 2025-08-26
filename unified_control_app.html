@@ -164,11 +164,20 @@
             background-color: var(--warning-dark, #e0a800);
         }
 
+        .btn-secondary {
+            background-color: var(--secondary-color, #6c757d);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-dark, #545b62);
+        }
+
         /* Status Grid */
         .status-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
             margin-bottom: 20px;
         }
 
@@ -314,6 +323,14 @@
                         <div class="status-value" id="ready-pool-limit">-</div>
                         <div class="status-label">Ready Pool Limit</div>
                     </div>
+                    <div class="status-item">
+                        <div class="status-value" id="guests-in-venue">-</div>
+                        <div class="status-label">Guests in Venue</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="venue-capacity">-</div>
+                        <div class="status-label">Venue Capacity</div>
+                    </div>
                 </div>
 
                 <div class="card">
@@ -338,12 +355,57 @@
                 </div>
 
                 <div class="card">
+                    <div class="card-header">Demo Mode</div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <label for="mock-count-input">Number of mock guests:</label>
+                        <input type="number" id="mock-count-input" min="1" max="100" style="width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <button class="btn btn-primary" id="mock-guests-btn">Insert Mock Guests</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Premium Access</div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <label for="premium-limit-input">Premium Limit:</label>
+                        <input type="number" id="premium-limit-input" min="0" max="100" style="width: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <button class="btn btn-primary" id="set-premium-limit-btn">Update Premium Limit</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label for="one-shot-price-input">One Shot Price ($):</label>
+                        <input type="number" id="one-shot-price-input" min="0" max="1000" style="width: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <button class="btn btn-primary" id="set-one-shot-price-btn">Update One Shot Price</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Venue Management</div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <label>
+                            <input type="checkbox" id="venue-mode-toggle">
+                            <span>Enable Venue Mode</span>
+                        </label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <label for="venue-capacity-input">Venue Capacity:</label>
+                        <input type="number" id="venue-capacity-input" min="0" max="10000" style="width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <button class="btn btn-primary" id="set-venue-capacity-btn">Update Venue Capacity</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn btn-warning" id="decrement-venue-btn">Remove Guest from Venue</button>
+                        <span style="color: #666; font-size: 0.9rem;">Use this when a guest leaves the venue</span>
+                    </div>
+                </div>
+
+                <div class="card">
                     <div class="card-header">Ready Pool Configuration</div>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label for="ready-pool-input">Ready Pool Size:</label>
-                        <input type="number" id="ready-pool-input" min="0" max="100" style="width: 80px; padding: 5px;">
+                        <input type="number" id="ready-pool-input" min="0" max="100" style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                         <button class="btn btn-primary" id="set-ready-pool">Set</button>
                     </div>
+                    <p style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        Set to 0 to disable ready pool. When enabled, the first N guests in the queue are considered "ready" and can be scanned in any order.
+                    </p>
                 </div>
             </div>
 
@@ -351,6 +413,15 @@
             <div id="links" class="content-section">
                 <div class="section-header">
                     <h2>Application Links</h2>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Legacy Admin Panel (Deprecated)</div>
+                    <p style="color: #666; margin-bottom: 15px;">
+                        The old admin control panel is deprecated. All functionality has been moved to this unified control app. 
+                        You can still access it for reference, but it may not work correctly with the current API.
+                    </p>
+                    <button class="btn btn-secondary" onclick="openLegacyAdmin()">Open Legacy Admin Panel</button>
                 </div>
                 
                 <div class="links-grid">
@@ -433,6 +504,8 @@
                     document.getElementById('guest-count').textContent = data.guest_count;
                     document.getElementById('ready-pool').textContent = data.ready_pool.length;
                     document.getElementById('ready-pool-limit').textContent = data.ready_pool_limit || 'Not Set';
+                    document.getElementById('guests-in-venue').textContent = data.guests_in_venue || 0;
+                    document.getElementById('venue-capacity').textContent = data.venue_capacity || 'Not Set';
                     
                     // Update queue list
                     const queueList = document.getElementById('queue-list');
@@ -496,6 +569,106 @@
                 .catch(error => console.error('Error loading ready pool limit:', error));
         }
 
+        // Load all queue configuration values
+        function loadQueueConfig() {
+            api('/status')
+                .then(data => {
+                    // Load ready pool limit
+                    if (data.ready_pool_limit) {
+                        document.getElementById('ready-pool-input').value = data.ready_pool_limit;
+                    }
+                    
+                    // Load premium limit
+                    if (data.premium_limit !== undefined) {
+                        document.getElementById('premium-limit-input').value = data.premium_limit;
+                    }
+                    
+                    // Load one shot price
+                    if (data.one_shot_price !== undefined) {
+                        document.getElementById('one-shot-price-input').value = data.one_shot_price;
+                    }
+                    
+                    // Load venue mode
+                    if (data.venue_mode_enabled !== undefined) {
+                        document.getElementById('venue-mode-toggle').checked = data.venue_mode_enabled;
+                    }
+                    
+                    // Load venue capacity
+                    if (data.venue_capacity !== undefined) {
+                        document.getElementById('venue-capacity-input').value = data.venue_capacity;
+                    }
+                })
+                .catch(error => console.error('Error loading queue config:', error));
+        }
+
+        // Demo mode functions
+        document.getElementById('mock-guests-btn').addEventListener('click', () => {
+            const count = document.getElementById('mock-count-input').value;
+            if (count > 0) {
+                api(`/mock-guests/${count}`, { method: 'POST' })
+                    .then(() => {
+                        loadStatus();
+                        document.getElementById('mock-count-input').value = '';
+                    })
+                    .catch(error => console.error('Error adding mock guests:', error));
+            }
+        });
+
+        // Premium access functions
+        document.getElementById('set-premium-limit-btn').addEventListener('click', () => {
+            const limit = document.getElementById('premium-limit-input').value;
+            if (limit >= 0) {
+                api('/set-premium-limit', {
+                    method: 'POST',
+                    body: JSON.stringify({ limit: parseInt(limit) })
+                })
+                    .then(() => loadStatus())
+                    .catch(error => console.error('Error setting premium limit:', error));
+            }
+        });
+
+        document.getElementById('set-one-shot-price-btn').addEventListener('click', () => {
+            const price = document.getElementById('one-shot-price-input').value;
+            if (price >= 0) {
+                api('/set-one-shot-price', {
+                    method: 'POST',
+                    body: JSON.stringify({ price: parseInt(price) })
+                })
+                    .then(() => loadStatus())
+                    .catch(error => console.error('Error setting one shot price:', error));
+            }
+        });
+
+        // Venue management functions
+        document.getElementById('venue-mode-toggle').addEventListener('change', () => {
+            const enabled = document.getElementById('venue-mode-toggle').checked;
+            api('/set-venue-mode', {
+                method: 'POST',
+                body: JSON.stringify({ enabled })
+            })
+                .then(() => loadStatus())
+                .catch(error => console.error('Error toggling venue mode:', error));
+        });
+
+        document.getElementById('set-venue-capacity-btn').addEventListener('click', () => {
+            const capacity = document.getElementById('venue-capacity-input').value;
+            if (capacity >= 0) {
+                api('/set-venue-capacity', {
+                    method: 'POST',
+                    body: JSON.stringify({ capacity: parseInt(capacity) })
+                })
+                    .then(() => loadStatus())
+                    .catch(error => console.error('Error setting venue capacity:', error));
+            }
+        });
+
+        // Decrement venue count
+        document.getElementById('decrement-venue-btn').addEventListener('click', () => {
+            api('/decrement-venue', { method: 'POST' })
+                .then(() => loadStatus())
+                .catch(error => console.error('Error decrementing venue:', error));
+        });
+
         // Update URLs and QR codes
         function updateLinks() {
             const baseUrl = window.location.origin + window.location.pathname.replace('unified_control_app.html', '');
@@ -526,10 +699,16 @@
             window.open('clicker_web_app.html', '_blank');
         }
 
+        // Legacy admin panel function
+        function openLegacyAdmin() {
+            window.open('admin_control_panel.html', '_blank');
+        }
+
         // Initialize the app
         function init() {
             loadStatus();
             loadReadyPoolLimit();
+            loadQueueConfig(); // Load all queue config values
             updateLinks();
             
             // Refresh status every 30 seconds

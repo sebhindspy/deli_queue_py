@@ -25,20 +25,38 @@
         const api = (path) => `${API_BASE}${path}`;
 
         async function fetchVenueStatus() {
-            const res = await fetch(api('/status'));
-            const data = await res.json();
-            const isFull = data.guests_in_venue >= data.venue_capacity;
-            document.getElementById('venueStatus').textContent = isFull ? 'Full' : 'Available';
-            document.getElementById('guestsInVenue').textContent = data.guests_in_venue;
+            try {
+                const res = await fetch(api('/status'));
+                const data = await res.json();
+                
+                // Ensure we have valid data
+                if (data && typeof data.guests_in_venue === 'number' && typeof data.venue_capacity === 'number') {
+                    const isFull = data.guests_in_venue >= data.venue_capacity;
+                    document.getElementById('venueStatus').textContent = isFull ? 'Full' : 'Available';
+                    document.getElementById('guestsInVenue').textContent = data.guests_in_venue;
+                } else {
+                    document.getElementById('venueStatus').textContent = 'Error';
+                    document.getElementById('guestsInVenue').textContent = 'Error';
+                }
+            } catch (error) {
+                console.error('Error fetching venue status:', error);
+                document.getElementById('venueStatus').textContent = 'Error';
+                document.getElementById('guestsInVenue').textContent = 'Error';
+            }
         }
 
         async function decrementVenue() {
-            const res = await fetch(api('/decrement-venue'), { method: 'POST' });
-            if (res.ok) {
-                fetchVenueStatus();
-            } else {
-                const error = await res.json();
-                alert(error.detail || "Error updating venue count.");
+            try {
+                const res = await fetch(api('/decrement-venue'), { method: 'POST' });
+                if (res.ok) {
+                    fetchVenueStatus();
+                } else {
+                    const error = await res.json();
+                    alert(error.detail || "Error updating venue count.");
+                }
+            } catch (error) {
+                console.error('Error decrementing venue:', error);
+                alert("Network error occurred while updating venue count.");
             }
         }
 

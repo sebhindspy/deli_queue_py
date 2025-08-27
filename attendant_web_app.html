@@ -31,6 +31,7 @@
 
         <button id="advanceBtn" onclick="advanceQueue()"></button>
         <button id="refreshScannerBtn" onclick="refreshScanner()" style="margin-left: 10px; background-color: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Refresh Scanner</button>
+        <button id="cameraSelectBtn" onclick="showCameraSelection()" style="margin-left: 10px; background-color: #17a2b8; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Select Camera</button>
     </div>
     <script>
         const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
@@ -164,6 +165,9 @@
                         document.getElementById("result").innerText = "";
                         // Reset the last scanned code to allow re-scanning
                         window.lastScannedCode = null;
+                        // Update scanner status back to ready
+                        document.getElementById('scanner-status').textContent = 'Scanner ready - Point camera at QR code';
+                        document.getElementById('scanner-status').style.color = '#28a745';
                     }, 3000);
                 } else {
                     const error = await response.json();
@@ -174,6 +178,9 @@
                         document.getElementById("result").innerText = "";
                         // Reset the last scanned code to allow re-scanning
                         window.lastScannedCode = null;
+                        // Update scanner status back to ready
+                        document.getElementById('scanner-status').textContent = 'Scanner ready - Point camera at QR code';
+                        document.getElementById('scanner-status').style.color = '#28a745';
                     }, 3000);
                 }
             } catch (err) {
@@ -185,21 +192,14 @@
                     document.getElementById("result").innerText = "";
                     // Reset the last scanned code to allow re-scanning
                     window.lastScannedCode = null;
+                    // Update scanner status back to ready
+                    document.getElementById('scanner-status').textContent = 'Scanner ready - Point camera at QR code';
+                    document.getElementById('scanner-status').style.color = '#28a745';
                 }, 3000);
             }
 
-            // Stop the scanner temporarily to prevent multiple scans
-            if (window.html5QrcodeScanner) {
-                try {
-                    window.html5QrcodeScanner.clear();
-                    // Re-initialize the scanner after a short delay
-                    setTimeout(() => {
-                        initializeScanner();
-                    }, 1000);
-                } catch (error) {
-                    console.error('Error clearing scanner:', error);
-                }
-            }
+            // Don't restart the scanner - let it continue scanning
+            // This prevents the flickering and error states
         }
 
         // Handle scanner errors gracefully
@@ -215,6 +215,38 @@
                 readerElement.innerHTML = "<p>Camera not supported. Please try a different device or browser.</p>";
             } else {
                 readerElement.innerHTML = "<p>Scanner error occurred. Please refresh the scanner.</p>";
+            }
+        }
+
+        // Get available cameras and help user select the right one
+        async function getAvailableCameras() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                console.log('Available cameras:', videoDevices);
+                
+                // On mobile, try to find back camera
+                const backCamera = videoDevices.find(device => 
+                    device.label.toLowerCase().includes('back') || 
+                    device.label.toLowerCase().includes('rear') ||
+                    device.label.toLowerCase().includes('environment')
+                );
+                
+                if (backCamera) {
+                    console.log('Found back camera:', backCamera.label);
+                    return backCamera.deviceId;
+                }
+                
+                // Fallback to first available camera
+                if (videoDevices.length > 0) {
+                    console.log('Using first available camera:', videoDevices[0].label);
+                    return videoDevices[0].deviceId;
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error getting cameras:', error);
+                return null;
             }
         }
 
@@ -239,41 +271,142 @@
                     }
                 }
                 
-                // Small delay to ensure cleanup is complete
+                // Wait for DOM to be ready and then initialize
                 setTimeout(() => {
                     try {
-                        const scanner = new Html5QrcodeScanner("reader", { 
-                            fps: 10, 
-                            qrbox: 250,
-                            rememberLastUsedCamera: true,
-                            showTorchButtonIfSupported: true
-                        });
-                        
-                        scanner.render(onScanSuccess, handleScannerError);
-                        window.html5QrcodeScanner = scanner;
-                        console.log('QR Scanner initialized successfully');
-                        
-                        // Update status to ready
-                        document.getElementById('scanner-status').textContent = 'Scanner ready - Point camera at QR code';
-                        document.getElementById('scanner-status').style.color = '#28a745';
+                        // Check if camera permissions are available
+                        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                            // Request camera permission first
+                            navigator.mediaDevices.getUserMedia({ video: true })
+                                .then(stream => {
+                                    // Camera permission granted, now create scanner
+                                    createScanner();
+                                    // Stop the test stream
+                                    stream.getTracks().forEach(track => track.stop());
+                                })
+                                .catch(permissionError => {
+                                    console.error('Camera permission error:', permissionError);
+                                    if (permissionError.name === 'NotAllowedError') {
+                                        readerElement.innerHTML = "<p>Camera access denied. Please allow camera access and refresh the scanner.</p>";
+                                        document.getElementById('scanner-status').textContent = 'Camera access denied';
+                                        document.getElementById('scanner-status').style.color = '#dc3545';
+                                    } else if (permissionError.name === 'NotFoundError') {
+                                        readerElement.innerHTML = "<p>No camera found. Please connect a camera and refresh the scanner.</p>";
+                                        document.getElementById('scanner-status').textContent = 'No camera found';
+                                        document.getElementById('scanner-status').style.color = '#dc3545';
+                                    } else {
+                                        readerElement.innerHTML = "<p>Camera error: " + permissionError.message + "</p>";
+                                        document.getElementById('scanner-status').textContent = 'Camera error';
+                                        document.getElementById('scanner-status').style.color = '#dc3545';
+                                    }
+                                });
+                        } else {
+                            // Fallback for older browsers
+                            createScanner();
+                        }
                     } catch (error) {
-                        console.error('Error creating scanner:', error);
-                        readerElement.innerHTML = "<p>Error creating QR scanner. Please try refreshing the scanner.</p>";
-                        document.getElementById('scanner-status').textContent = 'Scanner error - Please refresh';
+                        console.error('Error in scanner setup:', error);
+                        readerElement.innerHTML = "<p>Error setting up scanner. Please try refreshing the scanner.</p>";
+                        document.getElementById('scanner-status').textContent = 'Setup error';
                         document.getElementById('scanner-status').style.color = '#dc3545';
                     }
-                }, 100);
+                }, 200);
                 
             } catch (error) {
                 console.error('Error in scanner initialization:', error);
                 document.getElementById("reader").innerHTML = "<p>Error initializing QR scanner. Please refresh the page.</p>";
-                document.getElementById('scanner-status').textContent = 'Scanner initialization failed';
+                document.getElementById('scanner-status').textContent = 'Initialization failed';
+                document.getElementById('scanner-status').style.color = '#dc3545';
+            }
+        }
+
+        // Create the actual scanner after permissions are granted
+        function createScanner() {
+            try {
+                const readerElement = document.getElementById("reader");
+                
+                // Better configuration for mobile and desktop
+                const scannerConfig = {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    rememberLastUsedCamera: true,
+                    showTorchButtonIfSupported: true,
+                    disableFlip: false,
+                    verbose: false,
+                    // Better mobile support
+                    aspectRatio: 1.0,
+                    // Try to use back camera on mobile
+                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                };
+                
+                const scanner = new Html5QrcodeScanner("reader", scannerConfig);
+                
+                // Use a more robust error handler
+                scanner.render(onScanSuccess, (error) => {
+                    // Only show errors for actual camera/permission issues, not parsing errors
+                    if (error.name === 'NotAllowedError' || 
+                        error.name === 'NotFoundError' || 
+                        error.name === 'NotSupportedError' ||
+                        error.name === 'NotReadableError') {
+                        handleScannerError(error);
+                    } else {
+                        // For parsing errors, just log them but don't show to user
+                        console.log('Scanner parsing error (normal):', error.message);
+                    }
+                });
+                
+                window.html5QrcodeScanner = scanner;
+                console.log('QR Scanner created successfully');
+                
+                // Update status to ready
+                document.getElementById('scanner-status').textContent = 'Scanner ready - Point camera at QR code';
+                document.getElementById('scanner-status').style.color = '#28a745';
+                
+            } catch (error) {
+                console.error('Error creating scanner:', error);
+                document.getElementById("reader").innerHTML = "<p>Error creating QR scanner. Please try refreshing the scanner.</p>";
+                document.getElementById('scanner-status').textContent = 'Scanner creation failed';
                 document.getElementById('scanner-status').style.color = '#dc3545';
             }
         }
 
         function refreshScanner() {
             initializeScanner();
+        }
+
+        // Show camera selection dialog
+        async function showCameraSelection() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                
+                if (videoDevices.length === 0) {
+                    alert('No cameras found');
+                    return;
+                }
+                
+                // Create camera selection dialog
+                const cameraNames = videoDevices.map(device => device.label || `Camera ${device.deviceId.slice(0, 8)}`);
+                const selectedIndex = prompt(
+                    'Select a camera:\n\n' + 
+                    cameraNames.map((name, index) => `${index + 1}. ${name}`).join('\n') +
+                    '\n\nEnter the number of your choice:'
+                );
+                
+                if (selectedIndex && !isNaN(selectedIndex) && selectedIndex > 0 && selectedIndex <= videoDevices.length) {
+                    const selectedCamera = videoDevices[selectedIndex - 1];
+                    console.log('User selected camera:', selectedCamera.label);
+                    
+                    // Store the selected camera preference
+                    localStorage.setItem('preferredCameraId', selectedCamera.deviceId);
+                    
+                    // Refresh scanner with new camera
+                    refreshScanner();
+                }
+            } catch (error) {
+                console.error('Error showing camera selection:', error);
+                alert('Error showing camera selection. Please try refreshing the scanner.');
+            }
         }
 
         document.addEventListener("DOMContentLoaded", () => {

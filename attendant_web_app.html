@@ -27,11 +27,13 @@
             <p><strong id="nextGuestLabel">Next guest:</strong> <span id="nextGuest">Loading..</span><span id="premiumBadge"></span></p>
             <p><strong id="readyPoolLabel">Ready pool:</strong></p>
             <ul id="readyPoolList"></ul>
+            <p style="font-size: 0.8rem; color: #666; margin-top: 10px;"><em>Last updated: <span id="lastUpdateTime">Never</span></em></p>
         </div>
 
         <button id="advanceBtn" onclick="advanceQueue()"></button>
         <button id="refreshScannerBtn" onclick="refreshScanner()" style="margin-left: 10px; background-color: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Refresh Scanner</button>
         <button id="cameraSelectBtn" onclick="showCameraSelection()" style="margin-left: 10px; background-color: #17a2b8; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Select Camera</button>
+        <button id="refreshStatusBtn" onclick="fetchStatus()" style="margin-left: 10px; background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Refresh Status</button>
     </div>
     <script>
         const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
@@ -41,9 +43,20 @@
             try {
                 const response = await fetch(api('/status'));
                 const data = await response.json();
+                
+                console.log('Status update received:', data); // Debug log
 
                 // Fix: Use data.queue.length instead of data.queue.length
-                document.getElementById('guestCount').textContent = data.queue ? data.queue.length : 0;           
+                const guestCount = data.queue ? data.queue.length : 0;
+                const guestCountElement = document.getElementById('guestCount');
+                guestCountElement.textContent = guestCount;
+                
+                // Add visual feedback for status updates
+                guestCountElement.style.backgroundColor = '#e8f5e8';
+                setTimeout(() => {
+                    guestCountElement.style.backgroundColor = '';
+                }, 500);
+                
                 document.getElementById('queueStatus').textContent = data.is_open ? 'Open' : 'Closed';
 
                 const isFull = data.venue_mode_enabled && data.guests_in_venue >= data.venue_capacity;
@@ -52,6 +65,7 @@
                 const advanceBtn = document.getElementById('advanceBtn');
 
                 const readyPool = Array.isArray(data.ready_pool) ? data.ready_pool : [];
+                const readyPoolCount = readyPool.length;
 
                 if (data.queue && data.queue.length > 0 && !isFull) {
                     const nextGuest = readyPool.length > 0 ? readyPool[0] : data.queue[0];
@@ -77,6 +91,15 @@
                     li.textContent = email + (g.premium ? ' (Premium)' : '');
                     readyPoolList.appendChild(li);
                 });
+                
+                console.log(`Status updated: ${guestCount} guests in queue, ${readyPoolCount} in ready pool`); // Debug log
+                
+                // Show last update time
+                const now = new Date();
+                const timeString = now.toLocaleTimeString();
+                document.getElementById('lastUpdateTime').textContent = timeString;
+                console.log(`Status last updated at: ${timeString}`);
+                
             } catch (error) {
                 console.error('Error fetching status:', error);
                 // Set default values on error
@@ -91,11 +114,24 @@
 
         async function advanceQueue() {
             try {
+                console.log('Advancing queue...'); // Debug log
+                
                 const response = await fetch(api('/advance'), { method: 'POST' });
                 if (response.ok) {
-                    fetchStatus();
+                    const result = await response.json();
+                    console.log('Queue advanced successfully:', result); // Debug log
+                    
+                    // Show success message
+                    document.getElementById("result").innerText = "Guest removed from queue successfully";
+                    setTimeout(() => {
+                        document.getElementById("result").innerText = "";
+                    }, 2000);
+                    
+                    // Refresh status to show updated queue
+                    await fetchStatus();
                 } else {
                     const error = await response.json();
+                    console.error('Failed to advance queue:', error); // Debug log
                     alert(error.detail || "Failed to advance queue.");
                 }
             } catch (error) {
@@ -107,8 +143,19 @@
         // Apply site configuration
         applySiteConfig();
         
+        // Initial status fetch
         fetchStatus();
-        setInterval(fetchStatus, 5000);
+        
+        // Refresh status every 3 seconds for more responsive updates
+        setInterval(fetchStatus, 3000);
+        
+        // Also refresh status when page becomes visible (user returns to tab)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                console.log('Page became visible, refreshing status...');
+                fetchStatus();
+            }
+        });
 
         // Apply site configuration to UI elements
         function applySiteConfig() {
@@ -409,7 +456,93 @@
             }
         }
 
+        // Debug function to test queue status
+        async function debugQueueStatus() {
+            try {
+                console.log('=== DEBUG: Testing Queue Status ===');
+                const response = await fetch(api('/status'));
+                const data = await response.json();
+                
+                console.log('Raw API response:', data);
+                console.log('Queue length:', data.queue ? data.queue.length : 'undefined');
+                console.log('Ready pool length:', data.ready_pool ? data.ready_pool.length : 'undefined');
+                console.log('Queue open:', data.is_open);
+                console.log('Venue mode:', data.venue_mode_enabled);
+                console.log('Guests in venue:', data.guests_in_venue);
+                console.log('Venue capacity:', data.venue_capacity);
+                
+                // Test UI elements
+                const guestCountElement = document.getElementById('guestCount');
+                const queueStatusElement = document.getElementById('queueStatus');
+                const venueStatusElement = document.getElementById('venueStatus');
+                
+                console.log('UI Elements:');
+                console.log('- Guest count element:', guestCountElement);
+                console.log('- Guest count text:', guestCountElement ? guestCountElement.textContent : 'N/A');
+                console.log('- Queue status element:', queueStatusElement);
+                console.log('- Queue status text:', queueStatusElement ? queueStatusElement.textContent : 'N/A');
+                console.log('- Venue status element:', venueStatusElement);
+                console.log('- Venue status text:', venueStatusElement ? venueStatusElement.textContent : 'N/A');
+                
+                console.log('=== END DEBUG ===');
+            } catch (error) {
+                console.error('Debug function error:', error);
+            }
+        }
+
+        // Test function to debug queue removal
+        async function testQueueRemoval() {
+            try {
+                console.log('=== TESTING QUEUE REMOVAL ===');
+                
+                // Get status before removal
+                console.log('Status BEFORE removal:');
+                const beforeResponse = await fetch(api('/status'));
+                const beforeData = await beforeResponse.json();
+                console.log('Queue length before:', beforeData.queue ? beforeData.queue.length : 'undefined');
+                console.log('Ready pool length before:', beforeData.ready_pool ? beforeData.ready_pool.length : 'undefined');
+                
+                // Remove a guest
+                console.log('Removing guest from queue...');
+                const removeResponse = await fetch(api('/advance'), { method: 'POST' });
+                const removeResult = await removeResponse.json();
+                console.log('Remove response:', removeResult);
+                
+                // Wait a moment
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Get status after removal
+                console.log('Status AFTER removal:');
+                const afterResponse = await fetch(api('/status'));
+                const afterData = await afterResponse.json();
+                console.log('Queue length after:', afterData.queue ? afterData.queue.length : 'undefined');
+                console.log('Ready pool length after:', afterData.ready_pool ? afterData.ready_pool.length : 'undefined');
+                
+                // Update UI
+                await fetchStatus();
+                
+                console.log('=== END TEST ===');
+            } catch (error) {
+                console.error('Test function error:', error);
+            }
+        }
+
+        // Add debug button to help troubleshoot
         document.addEventListener("DOMContentLoaded", () => {
+            // Add debug button
+            const debugBtn = document.createElement('button');
+            debugBtn.textContent = 'Debug Status';
+            debugBtn.onclick = debugQueueStatus;
+            debugBtn.style.cssText = 'margin-left: 10px; background-color: #ffc107; color: #212529; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;';
+            document.querySelector('.info').appendChild(debugBtn);
+            
+            // Add test button
+            const testBtn = document.createElement('button');
+            testBtn.textContent = 'Test Queue Removal';
+            testBtn.onclick = testQueueRemoval;
+            testBtn.style.cssText = 'margin-left: 10px; background-color: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;';
+            document.querySelector('.info').appendChild(testBtn);
+            
             // Initialize scanner when page loads
             initializeScanner();
         });

@@ -114,6 +114,13 @@ def set_ready_pool_limit(data: dict):
     return {"message": "Ready pool limit updated"}
 
 
+@app.post("/daily-reset")
+def daily_reset():
+    """Manually trigger daily reset"""
+    result = queue.daily_reset()
+    return result
+
+
 @app.post("/scan")
 async def scan_guest(request: Request):
     data = await request.json()

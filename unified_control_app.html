@@ -165,8 +165,12 @@
         }
 
         .btn-secondary {
-            background-color: var(--secondary-color, #6c757d);
+            background-color: #6c757d;
             color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
         }
 
         .btn-secondary:hover {
@@ -272,6 +276,13 @@
             .sidebar-nav li {
                 flex-shrink: 0;
             }
+        }
+
+        .help-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
         }
     </style>
 </head>
@@ -406,6 +417,14 @@
                     <p style="margin-top: 10px; color: #666; font-size: 0.9rem;">
                         Set to 0 to disable ready pool. When enabled, the first N guests in the queue are considered "ready" and can be scanned in any order.
                     </p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Daily Operations</div>
+                    <div class="form-group">
+                        <button onclick="dailyReset()" class="btn btn-danger">Daily Reset Queue</button>
+                        <p class="help-text">Clears all guests from queue while preserving configuration. Use at start of business day.</p>
+                    </div>
                 </div>
             </div>
 
@@ -703,6 +722,22 @@
                 .then(() => loadStatus())
                 .catch(error => console.error('Error decrementing venue:', error));
         });
+
+        // Daily reset function
+        function dailyReset() {
+            if (confirm('Are you sure you want to perform a daily reset? This will clear all guests from the queue while preserving configuration.')) {
+                console.log('Performing daily reset...');
+                api('/daily-reset', { method: 'POST' })
+                    .then(() => {
+                        console.log('Daily reset successful');
+                        loadStatus();
+                    })
+                    .catch(error => {
+                        console.error('Error performing daily reset:', error);
+                        alert('Failed to perform daily reset. Please try again.');
+                    });
+            }
+        }
 
         // Update URLs and QR codes
         function updateLinks() {

@@ -46,6 +46,17 @@
                 
                 console.log('Status update received:', data); // Debug log
 
+                // Check for sudden queue changes
+                const currentGuestCount = data.queue ? data.queue.length : 0;
+                if (window.lastGuestCount !== undefined && window.lastGuestCount !== currentGuestCount) {
+                    console.warn(`🚨 QUEUE COUNT CHANGED: ${window.lastGuestCount} → ${currentGuestCount} at ${new Date().toLocaleTimeString()}`);
+                    console.warn('This might indicate automatic queue clearing or another process modifying the queue');
+                    
+                    // Log the full response to see what changed
+                    console.log('Full response when queue changed:', data);
+                }
+                window.lastGuestCount = currentGuestCount;
+
                 // Fix: Use data.queue.length instead of data.queue.length
                 const guestCount = data.queue ? data.queue.length : 0;
                 const guestCountElement = document.getElementById('guestCount');
@@ -456,6 +467,32 @@
             }
         }
 
+        // Check for multiple tabs/windows running the attendant app
+        function checkForMultipleInstances() {
+            const instanceId = Math.random().toString(36).substr(2, 9);
+            const storageKey = 'attendant_app_instance';
+            
+            // Store this instance ID
+            localStorage.setItem(storageKey, instanceId);
+            
+            // Check for other instances
+            const checkInterval = setInterval(() => {
+                const storedId = localStorage.getItem(storageKey);
+                if (storedId !== instanceId) {
+                    console.warn('🚨 MULTIPLE INSTANCES DETECTED! Another tab/window is running the attendant app');
+                    console.warn('This could cause queue conflicts and automatic clearing');
+                    clearInterval(checkInterval);
+                }
+            }, 2000);
+            
+            // Clean up when this tab closes
+            window.addEventListener('beforeunload', () => {
+                localStorage.removeItem(storageKey);
+            });
+            
+            console.log(`Attendant app instance ID: ${instanceId}`);
+        }
+
         // Debug function to test queue status
         async function debugQueueStatus() {
             try {
@@ -527,8 +564,79 @@
             }
         }
 
+        // Check for scheduled tasks or intervals that might be clearing the queue
+        function checkForScheduledTasks() {
+            console.log('=== CHECKING FOR SCHEDULED TASKS ===');
+            
+            // Check if there are any setInterval calls
+            const intervals = [];
+            for (let i = 1; i < 10000; i++) {
+                try {
+                    // This is a hack to check for intervals - not 100% reliable
+                    if (window.clearInterval && typeof window.clearInterval === 'function') {
+                        // We can't directly enumerate intervals, but we can log when they're created
+                        console.log('Interval monitoring enabled');
+                        break;
+                    }
+                } catch (e) {
+                    break;
+                }
+            }
+            
+            // Check for any setTimeout calls
+            console.log('Monitoring setTimeout calls...');
+            
+            // Override setTimeout to log all scheduled tasks
+            const originalSetTimeout = window.setTimeout;
+            window.setTimeout = function(...args) {
+                const callback = args[0];
+                const delay = args[1];
+                console.log(`⏰ setTimeout scheduled: ${delay}ms delay at ${new Date().toLocaleTimeString()}`);
+                return originalSetTimeout.apply(this, args);
+            };
+            
+            // Override setInterval to log all scheduled tasks
+            const originalSetInterval = window.setInterval;
+            window.setInterval = function(...args) {
+                const callback = args[0];
+                const delay = args[1];
+                console.log(`🔄 setInterval scheduled: ${delay}ms interval at ${new Date().toLocaleTimeString()}`);
+                return originalSetInterval.apply(this, args);
+            };
+            
+            console.log('=== END SCHEDULED TASKS CHECK ===');
+        }
+
+        // Monitor network activity to detect hidden API calls
+        function monitorNetworkActivity() {
+            // Override fetch to log all API calls
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                const url = args[0];
+                const method = args[1]?.method || 'GET';
+                
+                // Log all API calls
+                if (typeof url === 'string' && url.includes('/')) {
+                    console.log(`🌐 API Call: ${method} ${url} at ${new Date().toLocaleTimeString()}`);
+                }
+                
+                return originalFetch.apply(this, args);
+            };
+            
+            console.log('Network monitoring enabled - all API calls will be logged');
+        }
+
         // Add debug button to help troubleshoot
         document.addEventListener("DOMContentLoaded", () => {
+            // Enable network monitoring
+            monitorNetworkActivity();
+            
+            // Check for multiple instances
+            checkForMultipleInstances();
+            
+            // Check for scheduled tasks
+            checkForScheduledTasks();
+            
             // Add debug button
             const debugBtn = document.createElement('button');
             debugBtn.textContent = 'Debug Status';

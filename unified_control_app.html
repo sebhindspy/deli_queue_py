@@ -488,32 +488,44 @@
         // API helper function
         function api(endpoint, options = {}) {
             const url = window.API_BASE + endpoint;
+            console.log('API call:', url, options);
             return fetch(url, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 ...options
-            }).then(response => response.json());
+            }).then(response => {
+                console.log('API response status:', response.status);
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error(`API error: ${response.status}`);
+                }
+            });
         }
 
         // Load initial data
         function loadStatus() {
+            console.log('Loading status...');
             api('/status')
                 .then(data => {
-                    document.getElementById('queue-status').textContent = data.queue_open ? 'Open' : 'Closed';
-                    document.getElementById('guest-count').textContent = data.guest_count;
-                    document.getElementById('ready-pool').textContent = data.ready_pool.length;
+                    console.log('Status API response:', data);
+                    // Fix: Map the correct API response fields to UI elements
+                    document.getElementById('queue-status').textContent = data.is_open ? 'Open' : 'Closed';
+                    document.getElementById('guest-count').textContent = data.queue ? data.queue.length : 0;
+                    document.getElementById('ready-pool').textContent = data.ready_pool ? data.ready_pool.length : 0;
                     document.getElementById('ready-pool-limit').textContent = data.ready_pool_limit || 'Not Set';
                     document.getElementById('guests-in-venue').textContent = data.guests_in_venue || 0;
                     document.getElementById('venue-capacity').textContent = data.venue_capacity || 'Not Set';
                     
-                    // Update queue list
+                    // Update queue list with proper data structure
                     const queueList = document.getElementById('queue-list');
-                    if (data.guests && data.guests.length > 0) {
-                        queueList.innerHTML = data.guests.map((guest, index) => 
+                    if (data.queue && data.queue.length > 0) {
+                        queueList.innerHTML = data.queue.map((guest, index) => 
                             `<div style="padding: 5px 0; border-bottom: 1px solid #eee;">
                                 <strong>Position ${index}:</strong> ${guest.email} 
                                 <span style="color: #666;">(${guest.guest_location})</span>
+                                ${guest.premium ? '<span style="color: #ffc107; margin-left: 10px;">⭐ Premium</span>' : ''}
                             </div>`
                         ).join('');
                     } else {
@@ -523,26 +535,45 @@
                 .catch(error => {
                     console.error('Error loading status:', error);
                     document.getElementById('queue-list').innerHTML = '<em>Error loading queue status</em>';
+                    // Set error states for other elements
+                    document.getElementById('queue-status').textContent = 'Error';
+                    document.getElementById('guest-count').textContent = 'Error';
+                    document.getElementById('ready-pool').textContent = 'Error';
+                    document.getElementById('ready-pool-limit').textContent = 'Error';
+                    document.getElementById('guests-in-venue').textContent = 'Error';
+                    document.getElementById('venue-capacity').textContent = 'Error';
                 });
         }
 
         // Queue control functions
         document.getElementById('open-queue').addEventListener('click', () => {
+            console.log('Opening queue...');
             api('/open', { method: 'POST' })
-                .then(() => loadStatus())
+                .then(response => {
+                    console.log('Open queue response:', response);
+                    loadStatus();
+                })
                 .catch(error => console.error('Error opening queue:', error));
         });
 
         document.getElementById('close-queue').addEventListener('click', () => {
+            console.log('Closing queue...');
             api('/close', { method: 'POST' })
-                .then(() => loadStatus())
+                .then(response => {
+                    console.log('Close queue response:', response);
+                    loadStatus();
+                })
                 .catch(error => console.error('Error closing queue:', error));
         });
 
         document.getElementById('reset-queue').addEventListener('click', () => {
             if (confirm('Are you sure you want to reset the queue? This will remove all guests.')) {
+                console.log('Resetting queue...');
                 api('/reset', { method: 'POST' })
-                    .then(() => loadStatus())
+                    .then(response => {
+                        console.log('Reset queue response:', response);
+                        loadStatus();
+                    })
                     .catch(error => console.error('Error resetting queue:', error));
             }
         });
@@ -560,8 +591,10 @@
 
         // Load current ready pool limit
         function loadReadyPoolLimit() {
+            console.log('Loading ready pool limit...');
             api('/status')
                 .then(data => {
+                    console.log('Ready pool limit data:', data);
                     if (data.ready_pool_limit) {
                         document.getElementById('ready-pool-input').value = data.ready_pool_limit;
                     }
@@ -571,8 +604,10 @@
 
         // Load all queue configuration values
         function loadQueueConfig() {
+            console.log('Loading queue config...');
             api('/status')
                 .then(data => {
+                    console.log('Queue config data:', data);
                     // Load ready pool limit
                     if (data.ready_pool_limit) {
                         document.getElementById('ready-pool-input').value = data.ready_pool_limit;
@@ -706,6 +741,9 @@
 
         // Initialize the app
         function init() {
+            console.log('Initializing unified control app...');
+            console.log('API_BASE:', window.API_BASE);
+            
             loadStatus();
             loadReadyPoolLimit();
             loadQueueConfig(); // Load all queue config values
@@ -713,6 +751,8 @@
             
             // Refresh status every 30 seconds
             setInterval(loadStatus, 30000);
+            
+            console.log('Unified control app initialized');
         }
 
         // Start the app when page loads

@@ -17,7 +17,8 @@
             <p><strong id="guestsInVenueLabel">Guests in Venue:</strong> <span id="guestsInVenue">0</span></p>
         </div>
 
-        <button onclick="decrementVenue()" id="decrementBtn">Guest Left Venue</button>
+        <button onclick="decrementVenue()" class="btn btn-primary">Remove Guest from Venue</button>
+        <button onclick="forceRefreshVenueStatus()" class="btn btn-secondary" style="margin-left: 10px;">Force Refresh</button>
     </div>
 
     <script>
@@ -26,22 +27,31 @@
 
         async function fetchVenueStatus() {
             try {
-                const res = await fetch(api('/status'));
-                const data = await res.json();
+                const response = await fetch(api('/status'));
+                const data = await response.json();
                 
-                // Ensure we have valid data
-                if (data && typeof data.guests_in_venue === 'number' && typeof data.venue_capacity === 'number') {
+                // Update venue status with better logic
+                const venueStatusElement = document.getElementById('venueStatus');
+                const guestsInVenueElement = document.getElementById('guestsInVenue');
+                
+                if (data.venue_mode_enabled) {
                     const isFull = data.guests_in_venue >= data.venue_capacity;
-                    document.getElementById('venueStatus').textContent = isFull ? 'Full' : 'Available';
-                    document.getElementById('guestsInVenue').textContent = data.guests_in_venue;
+                    const statusText = isFull ? 'Full' : 'Available';
+                    
+                    venueStatusElement.textContent = statusText;
+                    venueStatusElement.style.color = isFull ? '#dc3545' : '#28a745'; // Red if full, green if available
                 } else {
-                    document.getElementById('venueStatus').textContent = 'Error';
-                    document.getElementById('guestsInVenue').textContent = 'Error';
+                    venueStatusElement.textContent = 'Disabled';
+                    venueStatusElement.style.color = '#6c757d'; // Gray if disabled
                 }
+                
+                // Update guest count
+                guestsInVenueElement.textContent = data.guests_in_venue || 0;
+                
             } catch (error) {
                 console.error('Error fetching venue status:', error);
                 document.getElementById('venueStatus').textContent = 'Error';
-                document.getElementById('guestsInVenue').textContent = 'Error';
+                document.getElementById('venueStatus').style.color = '#dc3545';
             }
         }
 
@@ -63,8 +73,22 @@
         // Apply site configuration
         applySiteConfig();
         
+        // Initial status fetch
         fetchVenueStatus();
-        setInterval(fetchVenueStatus, 5000);
+        
+        // Also refresh status when page becomes visible (user returns to tab)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                console.log('Page became visible, refreshing venue status...');
+                fetchVenueStatus();
+            }
+        });
+
+        // Force refresh function for immediate status update
+        function forceRefreshVenueStatus() {
+            console.log('Force refresh triggered...');
+            fetchVenueStatus();
+        }
 
         // Apply site configuration to UI elements
         function applySiteConfig() {

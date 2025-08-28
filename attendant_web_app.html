@@ -15,26 +15,27 @@
 <body>
     <div class="info">
         <h1 id="pageTitle">Venue Entry App</h1>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 10px;"><em>Last sync: <span id="lastUpdateTime">Never</span></em></p>
 
         <div id="reader"></div>
         <div id="scanner-status" style="text-align: center; margin: 10px 0; color: #666; font-size: 0.9rem;">Initializing scanner...</div>
         <div id="result"></div>
 
         <div class="status">
-            <p><strong id="venueStatusLabel">Venue status:</strong> <span id="venueStatus">Loading...</span></p>
             <p><strong id="queueStatusLabel">Queue status:</strong> <span id="queueStatus">Loading...</span></p>
             <p><strong id="guestCountLabel">Guests in queue:</strong> <span id="guestCount">0</span></p>
+            <p><strong id="venueStatusLabel">Venue status:</strong> <span id="venueStatus">Loading...</span></p>
             <p><strong id="nextGuestLabel">Next guest:</strong> <span id="nextGuest">Loading..</span><span id="premiumBadge"></span></p>
             <p><strong id="readyPoolLabel">Ready pool:</strong></p>
             <ul id="readyPoolList"></ul>
-            <p style="font-size: 0.8rem; color: #666; margin-top: 10px;"><em>Last updated: <span id="lastUpdateTime">Never</span></em></p>
+            
         </div>
 
         <button id="advanceBtn" onclick="advanceQueue()"></button>
-        <button id="refreshScannerBtn" onclick="refreshScanner()" style="margin-left: 10px; background-color: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Refresh Scanner</button>
-        <button id="cameraSelectBtn" onclick="showCameraSelection()" style="margin-left: 10px; background-color: #17a2b8; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Select Camera</button>
-        <button id="refreshStatusBtn" onclick="fetchStatus()" style="margin-left: 10px; background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Refresh Status</button>
-        <button id="forceRefreshBtn" onclick="forceRefreshStatus()" style="margin-left: 10px; background-color: #ffc107; color: #212529; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Force Refresh</button>
+        <button id="refreshScannerBtn" onclick="refreshScanner()" style="background-color: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">Refresh Scanner</button>
+        <button id="cameraSelectBtn" onclick="showCameraSelection()" style="background-color: #17a2b8; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">Select Camera</button>
+        <button id="refreshStatusBtn" onclick="fetchStatus()" style="background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">Refresh Status</button>
+        <button id="forceRefreshBtn" onclick="forceRefreshStatus()" style=" background-color: #ffc107; color: #212529; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">Force Refresh</button>
     </div>
     <script>
         const API_BASE = (window.API_BASE || '').replace(/\/$/, '');

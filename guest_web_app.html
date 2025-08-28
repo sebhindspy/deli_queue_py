@@ -68,7 +68,7 @@
         }
 
         async function isGuestPremium(email) {
-            const res = await fetch("/status");
+            const res = await fetch(api('/status'));
             const data = await res.json();
             const guest = data.queue.find(g => g.email === email);
             return guest && guest.premium;

@@ -189,19 +189,45 @@
 
                         positionSpan.textContent = data.position;
 
-                        const readyPoolSize = data.ready_pool_limit || 0;
-                        if ((readyPoolSize > 0 && data.position < readyPoolSize) || (readyPoolSize === 0 && data.position === 0)) {
-                            turnMessage.textContent = "It's your turn! Please proceed to the attraction.";
-                            qrContainer.innerHTML = "";
-                            new QRCode(qrContainer, {
-                                text: email,
-                                width: 128,
-                                height: 128
+                        // Get current queue status to check if guest is in ready pool
+                        fetch(api('/status'))
+                            .then(res => res.json())
+                            .then(statusData => {
+                                console.log('Status data for QR logic:', statusData);
+                                
+                                // Find the current guest in the queue
+                                const currentGuest = statusData.queue.find(g => g.email === email);
+                                console.log('Current guest data:', currentGuest);
+                                
+                                if (currentGuest && currentGuest.guest_location === 'ready') {
+                                    console.log('Guest is in ready pool, showing QR code');
+                                    turnMessage.textContent = "It's your turn! Please proceed to the attraction.";
+                                    qrContainer.innerHTML = "";
+                                    new QRCode(qrContainer, {
+                                        text: email,
+                                        width: 128,
+                                        height: 128
+                                    });
+                                } else {
+                                    console.log('Guest is not in ready pool, hiding QR code');
+                                    const position = data.position + 1;
+                                    turnMessage.textContent = `You are in position ${position}. Please wait for your turn.`;
+                                    qrContainer.innerHTML = "";
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching status for QR code logic:', error);
+                                // Fallback: show QR code if position is 0
+                                if (data.position === 0) {
+                                    turnMessage.textContent = "It's your turn! Please proceed to the attraction.";
+                                    qrContainer.innerHTML = "";
+                                    new QRCode(qrContainer, {
+                                        text: email,
+                                        width: 128,
+                                        height: 128
+                                    });
+                                }
                             });
-                        } else {
-                            turnMessage.textContent = "";
-                            qrContainer.innerHTML = "";
-                        }
                     })
                     .catch(() => {
                         missedPolls++;

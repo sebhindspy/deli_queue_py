@@ -74,7 +74,92 @@ window.SITE_CONFIG = {
         
         // Admin Panel Additional
         siteConfigurationLabel: "Site Configuration",
-        openCMSBtn: "Open Configuration CMS"
+        openCMSBtn: "Open Configuration CMS",
+        
+        // Unified Control App
+        unifiedControlTitle: "Queue Control",
+        homeSection: "Home",
+        queuesSection: "Queues",
+        linksSection: "Links",
+        configSection: "Config",
+        systemStatus: "System Status",
+        queueManagement: "Queue Management",
+        applicationLinks: "Application Links",
+        siteConfiguration: "Site Configuration",
+        
+        // Status Items
+        queueStatus: "Queue Status",
+        guestsInQueue: "Guests in Queue",
+        readyPool: "Ready Pool",
+        readyPoolLimit: "Ready Pool Limit",
+        guestsInVenue: "Guests in Venue",
+        venueCapacity: "Venue Capacity",
+        currentQueue: "Current Queue",
+        noGuestsInQueue: "No guests in queue",
+        
+        // Queue Controls
+        queueControls: "Queue Controls",
+        openQueue: "Open Queue",
+        closeQueue: "Close Queue",
+        resetQueue: "Reset Queue",
+        
+        // Demo Mode
+        demoMode: "Demo Mode",
+        mockGuestsLabel: "Number of mock guests:",
+        insertMockGuests: "Insert Mock Guests",
+        resetCounter: "Reset Counter",
+        mockGuestsHelp: "Mock guests get unique names (mock0, mock1, mock2...). Use \"Reset Counter\" to start over from 0.",
+        
+        // Premium Access
+        premiumAccess: "Premium Access",
+        enablePremiumAccess: "Enable Premium Access",
+        premiumLimitLabel: "Premium Limit:",
+        updatePremiumLimit: "Update Premium Limit",
+        oneShotPriceLabel: "One Shot Price ($):",
+        updateOneShotPrice: "Update One Shot Price",
+        premiumAccessHelp: "Premium access must be enabled AND premium limit must be >0 for the upgrade button to appear in the guest app.",
+        
+        // Venue Management
+        venueManagement: "Venue Management",
+        enableVenueMode: "Enable Venue Mode",
+        venueCapacityLabel: "Venue Capacity:",
+        updateVenueCapacity: "Update Venue Capacity",
+        removeGuestFromVenue: "Remove Guest from Venue",
+        removeGuestHelp: "Use this when a guest leaves the venue",
+        
+        // Ready Pool Configuration
+        readyPoolConfiguration: "Ready Pool Configuration",
+        readyPoolSizeLabel: "Ready Pool Size:",
+        setReadyPool: "Set",
+        readyPoolHelp: "Set to 0 to disable ready pool. When enabled, the first N guests in the queue are considered \"ready\" and can be scanned in any order.",
+        
+        // Daily Operations
+        dailyOperations: "Daily Operations",
+        dailyResetQueue: "Daily Reset Queue",
+        dailyResetHelp: "Clears all guests from queue while preserving configuration. Use at start of business day.",
+        
+        // Links Section
+        legacyAdminPanel: "Legacy Admin Panel (Deprecated)",
+        legacyAdminDescription: "The old admin control panel is deprecated. All functionality has been moved to this unified control app. You can still access it for reference, but it may not work correctly with the current API.",
+        openLegacyAdmin: "Open Legacy Admin Panel",
+        guestApp: "Guest App",
+        attendantApp: "Attendant App",
+        clickerApp: "Clicker App",
+        openGuestApp: "Open Guest App",
+        openAttendantApp: "Open Attendant App",
+        openClickerApp: "Open Clicker App",
+        qrCodePlaceholder: "QR Code will appear here",
+        loadingPlaceholder: "Loading...",
+        
+        // Configuration Management
+        configurationManagement: "Configuration Management",
+        configManagementHelp: "Use the interface below to manage site colors, text, and branding:",
+        
+        // Navigation Icons
+        homeIcon: "🏠",
+        queuesIcon: "📋",
+        linksIcon: "🔗",
+        configIcon: "⚙️"
     },
 
     // Features

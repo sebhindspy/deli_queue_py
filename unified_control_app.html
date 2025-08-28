@@ -5,306 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Queue Management Control</title>
     <link rel="stylesheet" href="static/style.css">
-    <style>
-        /* Unified Control App Specific Styles */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-        }
-
-        .app-container {
-            display: flex;
-            height: 100vh;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            width: 256px;
-            background-color: var(--primary-color, #007bff);
-            color: white;
-            padding: 20px 0;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-        }
-
-        .sidebar-header {
-            text-align: center;
-            padding: 0 20px 20px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            margin-bottom: 20px;
-        }
-
-        .sidebar-header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 300;
-        }
-
-        .sidebar-nav {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .sidebar-nav li {
-            margin: 0;
-        }
-
-        .sidebar-nav a {
-            display: block;
-            padding: 15px 20px;
-            color: white;
-            text-decoration: none;
-            transition: background-color 0.3s;
-            border-left: 3px solid transparent;
-        }
-
-        .sidebar-nav a:hover,
-        .sidebar-nav a.active {
-            background-color: rgba(255,255,255,0.1);
-            border-left-color: white;
-        }
-
-        .sidebar-nav a i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-
-        /* Main Content Area */
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .content-section {
-            display: none;
-        }
-
-        .content-section.active {
-            display: block;
-        }
-
-        .section-header {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--primary-color, #007bff);
-        }
-
-        .section-header h2 {
-            margin: 0;
-            color: var(--primary-color, #007bff);
-            font-size: 1.8rem;
-        }
-
-        /* Card Styles */
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .card-header {
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: var(--primary-color, #007bff);
-            font-size: 1.1rem;
-        }
-
-        /* Button Styles */
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            transition: background-color 0.3s;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color, #007bff);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark, #0056b3);
-        }
-
-        .btn-success {
-            background-color: var(--success-color, #28a745);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: var(--success-dark, #1e7e34);
-        }
-
-        .btn-danger {
-            background-color: var(--danger-color, #dc3545);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: var(--danger-dark, #c82333);
-        }
-
-        .btn-warning {
-            background-color: var(--warning-color, #ffc107);
-            color: #212529;
-        }
-
-        .btn-warning:hover {
-            background-color: var(--warning-dark, #e0a800);
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--secondary-dark, #545b62);
-        }
-
-        /* Status Grid */
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .status-item {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .status-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color, #007bff);
-            margin-bottom: 5px;
-        }
-
-        .status-label {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        /* Queue Controls */
-        .queue-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        /* Links Section */
-        .links-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .link-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .link-card h3 {
-            margin-top: 0;
-            color: var(--primary-color, #007bff);
-        }
-
-        .qr-code {
-            margin: 15px 0;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 4px;
-        }
-
-        .link-url {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 4px;
-            font-family: monospace;
-            word-break: break-all;
-            margin: 10px 0;
-        }
-
-        /* Config Section */
-        .config-iframe {
-            width: 100%;
-            height: 600px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                height: auto;
-            }
-            
-            .sidebar-nav {
-                display: flex;
-                overflow-x: auto;
-            }
-            
-            .sidebar-nav li {
-                flex-shrink: 0;
-            }
-        }
-
-        .help-text {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 5px;
-            font-style: italic;
-        }
-    </style>
 </head>
 <body>
     <div class="app-container">
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <h1>Queue Control</h1>
+                <h1 id="sidebar-title">Queue Control</h1>
             </div>
             <ul class="sidebar-nav">
                 <li><a href="#home" class="nav-link active" data-section="home">
-                    <i>🏠</i>Home
+                    <i id="home-icon">🏠</i><span id="home-text">Home</span>
                 </a></li>
                 <li><a href="#queues" class="nav-link" data-section="queues">
-                    <i>📋</i>Queues
+                    <i id="queues-icon">📋</i><span id="queues-text">Queues</span>
                 </a></li>
                 <li><a href="#links" class="nav-link" data-section="links">
-                    <i>🔗</i>Links
+                    <i id="links-icon">🔗</i><span id="links-text">Links</span>
                 </a></li>
                 <li><a href="#config" class="nav-link" data-section="config">
-                    <i>⚙️</i>Config
+                    <i id="config-icon">⚙️</i><span id="config-text">Config</span>
                 </a></li>
             </ul>
         </div>
@@ -314,7 +34,7 @@
             <!-- Home Section -->
             <div id="home" class="content-section active">
                 <div class="section-header">
-                    <h2>System Status</h2>
+                    <h2 id="system-status-title">System Status</h2>
                 </div>
                 
                 <div class="status-grid">
@@ -353,11 +73,11 @@
             <!-- Queues Section -->
             <div id="queues" class="content-section">
                 <div class="section-header">
-                    <h2>Queue Management</h2>
+                    <h2 id="queue-management-title">Queue Management</h2>
                 </div>
                 
                 <div class="card">
-                    <div class="card-header">Queue Controls</div>
+                    <div class="card-header" id="queue-controls-header">Queue Controls</div>
                     <div class="queue-controls">
                         <button class="btn btn-success" id="open-queue">Open Queue</button>
                         <button class="btn btn-danger" id="close-queue">Close Queue</button>
@@ -366,14 +86,14 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-header">Demo Mode</div>
+                    <div class="card-header" id="demo-mode-header">Demo Mode</div>
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                        <label for="mock-count-input">Number of mock guests:</label>
+                        <label for="mock-count-input" id="mock-guests-label">Number of mock guests:</label>
                         <input type="number" id="mock-count-input" min="1" max="100" style="width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                         <button class="btn btn-primary" id="mock-guests-btn">Insert Mock Guests</button>
                         <button class="btn btn-warning" id="reset-mock-counter-btn">Reset Counter</button>
                     </div>
-                    <p style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                    <p style="margin-top: 10px; color: #666; font-size: 0.9rem;" id="mock-guests-help">
                         Mock guests get unique names (mock0, mock1, mock2...). Use "Reset Counter" to start over from 0.
                     </p>
                 </div>
@@ -444,7 +164,7 @@
             <!-- Links Section -->
             <div id="links" class="content-section">
                 <div class="section-header">
-                    <h2>Application Links</h2>
+                    <h2 id="application-links-title">Application Links</h2>
                 </div>
                 
                 <div class="card">
@@ -483,7 +203,7 @@
             <!-- Config Section -->
             <div id="config" class="content-section">
                 <div class="section-header">
-                    <h2>Site Configuration</h2>
+                    <h2 id="site-config-title">Site Configuration</h2>
                 </div>
                 
                 <div class="card">
@@ -516,6 +236,22 @@
                 document.getElementById(sectionId).classList.add('active');
             });
         });
+
+        // Helper function to get config values with fallbacks
+        function getConfig(key, defaultValue = '') {
+            try {
+                const keys = key.split('.');
+                let value = window.SITE_CONFIG || {};
+                for (const k of keys) {
+                    value = value[k];
+                    if (value === undefined) return defaultValue;
+                }
+                return value || defaultValue;
+            } catch (error) {
+                console.warn('Error getting config for key:', key, error);
+                return defaultValue;
+            }
+        }
 
         // API helper function
         function api(endpoint, options = {}) {
@@ -814,10 +550,85 @@
             window.open('admin_control_panel.html', '_blank');
         }
 
+        // Apply site configuration to UI elements
+        function applySiteConfig() {
+            try {
+                // Sidebar title
+                if (document.getElementById('sidebar-title')) {
+                    document.getElementById('sidebar-title').textContent = getConfig('text.unifiedControlTitle', 'Queue Control');
+                }
+                
+                // Navigation items
+                if (document.getElementById('home-text')) {
+                    document.getElementById('home-text').textContent = getConfig('text.homeSection', 'Home');
+                }
+                if (document.getElementById('queues-text')) {
+                    document.getElementById('queues-text').textContent = getConfig('text.queuesSection', 'Queues');
+                }
+                if (document.getElementById('links-text')) {
+                    document.getElementById('links-text').textContent = getConfig('text.linksSection', 'Links');
+                }
+                if (document.getElementById('config-text')) {
+                    document.getElementById('config-text').textContent = getConfig('text.configSection', 'Config');
+                }
+                
+                // Navigation icons
+                if (document.getElementById('home-icon')) {
+                    document.getElementById('home-icon').textContent = getConfig('text.homeIcon', '🏠');
+                }
+                if (document.getElementById('queues-icon')) {
+                    document.getElementById('queues-icon').textContent = getConfig('text.queuesIcon', '📋');
+                }
+                if (document.getElementById('links-icon')) {
+                    document.getElementById('links-icon').textContent = getConfig('text.linksIcon', '🔗');
+                }
+                if (document.getElementById('config-icon')) {
+                    document.getElementById('config-icon').textContent = getConfig('text.configIcon', '⚙️');
+                }
+                
+                // Section headers
+                if (document.getElementById('system-status-title')) {
+                    document.getElementById('system-status-title').textContent = getConfig('text.systemStatus', 'System Status');
+                }
+                if (document.getElementById('queue-management-title')) {
+                    document.getElementById('queue-management-title').textContent = getConfig('text.queueManagement', 'Queue Management');
+                }
+                if (document.getElementById('application-links-title')) {
+                    document.getElementById('application-links-title').textContent = getConfig('text.applicationLinks', 'Application Links');
+                }
+                if (document.getElementById('site-config-title')) {
+                    document.getElementById('site-config-title').textContent = getConfig('text.siteConfiguration', 'Site Configuration');
+                }
+                
+                // Card headers
+                if (document.getElementById('queue-controls-header')) {
+                    document.getElementById('queue-controls-header').textContent = getConfig('text.queueControls', 'Queue Controls');
+                }
+                if (document.getElementById('demo-mode-header')) {
+                    document.getElementById('demo-mode-header').textContent = getConfig('text.demoMode', 'Demo Mode');
+                }
+                
+                // Labels and help text
+                if (document.getElementById('mock-guests-label')) {
+                    document.getElementById('mock-guests-label').textContent = getConfig('text.mockGuestsLabel', 'Number of mock guests:');
+                }
+                if (document.getElementById('mock-guests-help')) {
+                    document.getElementById('mock-guests-help').textContent = getConfig('text.mockGuestsHelp', 'Mock guests get unique names (mock0, mock1, mock2...). Use "Reset Counter" to start over from 0.');
+                }
+                
+                console.log('Site configuration applied successfully');
+            } catch (error) {
+                console.error('Error applying site configuration:', error);
+            }
+        }
+
         // Initialize the app
         function init() {
             console.log('Initializing unified control app...');
             console.log('API_BASE:', window.API_BASE);
+            
+            // Apply site configuration first
+            applySiteConfig();
             
             loadStatus();
             loadReadyPoolLimit();

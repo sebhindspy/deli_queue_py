@@ -19,6 +19,7 @@ class QueueController:
         self.ready_pool_limit = (
             0  # 0 means disabled; when >0, top N guests are considered "ready"
         )
+        self.premium_access_enabled = False  # Toggle for premium access feature
         # persistence
         self._app_id = os.getenv("APP_ID", "default")
         table_name = os.getenv("DDB_TABLE_NAME")
@@ -66,6 +67,7 @@ class QueueController:
             "queue": queue_with_location,
             "premium_limit": self.premium_limit,
             "one_shot_price": self.one_shot_price,
+            "premium_access_enabled": self.premium_access_enabled,
             "venue_mode_enabled": self.venue_mode_enabled,
             "venue_capacity": self.venue_capacity,
             "guests_in_venue": self.guests_in_venue,
@@ -85,6 +87,18 @@ class QueueController:
     def join_premium_queue(self, email: str):
         if not self.is_open:
             raise HTTPException(status_code=403, detail="Queue is closed.")
+
+        # Check if premium access is enabled
+        if not self.premium_access_enabled:
+            raise HTTPException(
+                status_code=403, detail="Premium access is currently disabled."
+            )
+
+        # Check if premium limit is set
+        if self.premium_limit <= 0:
+            raise HTTPException(
+                status_code=403, detail="Premium access is not configured."
+            )
 
         # Remove guest if already in queue
         existing_guest = None
@@ -166,6 +180,11 @@ class QueueController:
 
     def set_premium_limit(self, limit: int):
         self.premium_limit = limit
+        self._save()
+
+    def set_premium_access(self, enabled: bool):
+        """Enable or disable premium access feature"""
+        self.premium_access_enabled = enabled
         self._save()
 
     def set_one_shot_price(self, price: int):
@@ -303,6 +322,7 @@ class QueueController:
             "is_open": self.is_open,
             "premium_limit": self.premium_limit,
             "one_shot_price": self.one_shot_price,
+            "premium_access_enabled": self.premium_access_enabled,
             "venue_mode_enabled": self.venue_mode_enabled,
             "venue_capacity": self.venue_capacity,
             "guests_in_venue": self.guests_in_venue,
@@ -315,6 +335,7 @@ class QueueController:
         self.is_open = state.get("is_open", True)
         self.premium_limit = state.get("premium_limit", 0)
         self.one_shot_price = state.get("one_shot_price", 5)
+        self.premium_access_enabled = state.get("premium_access_enabled", False)
         self.venue_mode_enabled = state.get("venue_mode_enabled", False)
         self.venue_capacity = state.get("venue_capacity", 0)
         self.guests_in_venue = state.get("guests_in_venue", 0)

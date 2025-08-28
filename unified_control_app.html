@@ -381,6 +381,12 @@
                 <div class="card">
                     <div class="card-header">Premium Access</div>
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <label>
+                            <input type="checkbox" id="premium-access-toggle">
+                            <span>Enable Premium Access</span>
+                        </label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                         <label for="premium-limit-input">Premium Limit:</label>
                         <input type="number" id="premium-limit-input" min="0" max="100" style="width: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                         <button class="btn btn-primary" id="set-premium-limit-btn">Update Premium Limit</button>
@@ -390,6 +396,9 @@
                         <input type="number" id="one-shot-price-input" min="0" max="1000" style="width: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                         <button class="btn btn-primary" id="set-one-shot-price-btn">Update One Shot Price</button>
                     </div>
+                    <p style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        Premium access must be enabled AND premium limit must be >0 for the upgrade button to appear in the guest app.
+                    </p>
                 </div>
 
                 <div class="card">
@@ -641,6 +650,11 @@
                         document.getElementById('premium-limit-input').value = data.premium_limit;
                     }
                     
+                    // Load premium access toggle
+                    if (data.premium_access_enabled !== undefined) {
+                        document.getElementById('premium-access-toggle').checked = data.premium_access_enabled;
+                    }
+                    
                     // Load one shot price
                     if (data.one_shot_price !== undefined) {
                         document.getElementById('one-shot-price-input').value = data.one_shot_price;
@@ -695,6 +709,16 @@
                     .then(() => loadStatus())
                     .catch(error => console.error('Error setting premium limit:', error));
             }
+        });
+
+        document.getElementById('premium-access-toggle').addEventListener('change', () => {
+            const enabled = document.getElementById('premium-access-toggle').checked;
+            api('/set-premium-access', {
+                method: 'POST',
+                body: JSON.stringify({ enabled })
+            })
+                .then(() => loadStatus())
+                .catch(error => console.error('Error toggling premium access:', error));
         });
 
         document.getElementById('set-one-shot-price-btn').addEventListener('click', () => {

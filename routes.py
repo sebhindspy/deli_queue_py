@@ -90,3 +90,21 @@ def set_venue_capacity(payload: dict):
 def decrement_venue():
     queue.decrement_guests_in_venue()
     return {"message": "Guest removed from venue"}
+
+
+@router.post("/set-premium-limit")
+def set_premium_limit(data: dict):
+    queue.set_premium_limit(data["limit"])
+    return {"message": "Premium limit updated"}
+
+
+@router.post("/set-premium-access")
+def set_premium_access(data: dict):
+    queue.set_premium_access(data["enabled"])
+    return {"message": f"Premium access {'enabled' if data['enabled'] else 'disabled'}"}
+
+
+@router.post("/set-one-shot-price")
+def set_one_shot_price(data: dict):
+    queue.set_one_shot_price(data["price"])
+    return {"message": f"One-shot price set to {data['price']}"}

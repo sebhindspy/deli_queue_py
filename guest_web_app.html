@@ -219,11 +219,19 @@
                 .then(res => res.json())
                 .then(data => {
                     queueStatusDiv.textContent = ` ${data.is_open ? "Open" : "Closed"}`;
-                    if (data.premium_limit && data.queue) {
+                    
+                    // Check if premium access is enabled AND premium limit is >0
+                    const premiumAccessEnabled = data.premium_access_enabled && data.premium_limit > 0;
+                    
+                    if (premiumAccessEnabled && data.queue) {
                         const premiumCount = data.queue.filter(g => g.premium).length;
                         const available = premiumCount < data.premium_limit;
                         premiumBtn.disabled = !available || premiumPurchased;
                         premiumBtn.textContent = available ? `Skip the Line for $${data.one_shot_price}` : "Premium unavailable";
+                        premiumBtn.style.display = "block"; // Show the button
+                    } else {
+                        // Hide the premium button if premium access is disabled or limit is 0
+                        premiumBtn.style.display = "none";
                     }
                 });
         }

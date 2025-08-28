@@ -77,7 +77,7 @@
         fetchVenueStatus();
         
         // Refresh status every 5 seconds for automatic updates
-        setInterval(fetchVenueStatus, 5000);
+        setInterval(fetchVenueStatus, 3000);
         
         // Also refresh status when page becomes visible (user returns to tab)
         document.addEventListener('visibilitychange', () => {

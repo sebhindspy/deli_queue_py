@@ -26,6 +26,7 @@ class QueueController:
             DynamoDBPersistence(table_name) if table_name else InMemoryPersistence()
         )
         self._last_load_time = None
+        self._mock_guest_counter = 0  # Counter for mock guest names
         self._load()
 
     def _ensure_fresh_state(self):
@@ -147,7 +148,19 @@ class QueueController:
 
     def mock_guests(self, count: int):
         for i in range(count):
-            self.queue.append({"email": f"mock{i}@example.com", "premium": False})
+            self.queue.append(
+                {
+                    "email": f"mock{self._mock_guest_counter}@example.com",
+                    "premium": False,
+                }
+            )
+            self._mock_guest_counter += 1
+        self._save()
+
+    def reset_mock_counter(self):
+        """Reset the mock guest counter back to 0"""
+        self._mock_guest_counter = 0
+        self._save()
 
     ### premuim queue bits
 
@@ -294,6 +307,7 @@ class QueueController:
             "venue_capacity": self.venue_capacity,
             "guests_in_venue": self.guests_in_venue,
             "ready_pool_limit": self.ready_pool_limit,
+            "mock_guest_counter": self._mock_guest_counter,
         }
 
     def _hydrate(self, state: Dict[str, any]):
@@ -305,6 +319,7 @@ class QueueController:
         self.venue_capacity = state.get("venue_capacity", 0)
         self.guests_in_venue = state.get("guests_in_venue", 0)
         self.ready_pool_limit = state.get("ready_pool_limit", 0)
+        self._mock_guest_counter = state.get("mock_guest_counter", 0)
 
     def _load(self):
         try:

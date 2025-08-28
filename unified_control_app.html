@@ -371,7 +371,11 @@
                         <label for="mock-count-input">Number of mock guests:</label>
                         <input type="number" id="mock-count-input" min="1" max="100" style="width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                         <button class="btn btn-primary" id="mock-guests-btn">Insert Mock Guests</button>
+                        <button class="btn btn-warning" id="reset-mock-counter-btn">Reset Counter</button>
                     </div>
+                    <p style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                        Mock guests get unique names (mock0, mock1, mock2...). Use "Reset Counter" to start over from 0.
+                    </p>
                 </div>
 
                 <div class="card">
@@ -665,6 +669,18 @@
                         document.getElementById('mock-count-input').value = '';
                     })
                     .catch(error => console.error('Error adding mock guests:', error));
+            }
+        });
+
+        document.getElementById('reset-mock-counter-btn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset the mock guest counter? This will remove all mock guests from the queue.')) {
+                console.log('Resetting mock guest counter...');
+                api('/reset-mock-counter', { method: 'POST' })
+                    .then(() => {
+                        console.log('Mock guest counter reset successful');
+                        loadStatus();
+                    })
+                    .catch(error => console.error('Error resetting mock guest counter:', error));
             }
         });
 

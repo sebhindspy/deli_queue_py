@@ -78,11 +78,11 @@
                     fetchVenueStatus();
                 } else {
                     const error = await res.json();
-                    alert(error.detail || "Error updating venue count.");
+                    alert(error.detail || getConfig('text.errorUpdatingVenueCount', 'Error updating venue count.'));
                 }
             } catch (error) {
                 console.error('Error decrementing venue:', error);
-                alert("Network error occurred while updating venue count.");
+                alert(getConfig('text.networkErrorUpdatingVenue', 'Network error occurred while updating venue count.'));
             }
         }
 

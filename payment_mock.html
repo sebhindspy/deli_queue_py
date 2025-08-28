@@ -33,7 +33,7 @@
             if (email) {
                 window.location.href = `guest_web_app.html?email=${encodeURIComponent(email)}&paid=true`;
             } else {
-                alert("Missing guest email. Cannot return to guest app.");
+                alert(getConfig('text.missingGuestEmailReturn', 'Missing guest email. Cannot return to guest app.'));
             }
         }
 

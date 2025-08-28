@@ -510,7 +510,7 @@
                     })
                     .catch(error => {
                         console.error('Error performing daily reset:', error);
-                        alert('Failed to perform daily reset. Please try again.');
+                        alert(getConfig('text.failedDailyReset', 'Failed to perform daily reset. Please try again.'));
                     });
             }
         }

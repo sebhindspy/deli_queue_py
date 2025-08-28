@@ -63,7 +63,7 @@
             if (email) {
                 window.location.href = `payment_mock.html?email=${encodeURIComponent(email)}`;
             } else {
-                alert("Missing guest email. Cannot proceed to payment.");
+                alert(getConfig('text.missingGuestEmail', 'Missing guest email. Cannot proceed to payment.'));
             }
         }
 
@@ -82,9 +82,9 @@
                 premiumPurchased = true;
                 inQueue = true;
                 updateButton();
-                premiumBtn.textContent = "Payment Complete";
+                premiumBtn.textContent = getConfig('text.paymentComplete', 'Payment Complete');
                 premiumBtn.disabled = true;
-                statusDiv.querySelector("#turnMessage").textContent = "You are already in the premium queue.";
+                statusDiv.querySelector("#turnMessage").textContent = getConfig('text.alreadyPremium', 'You are already in the premium queue.');
                 startPolling(email);
                 return;
             }
@@ -99,20 +99,20 @@
                 premiumPurchased = true;
                 inQueue = true;
                 updateButton();
-                premiumBtn.textContent = "Payment Complete";
+                premiumBtn.textContent = getConfig('text.paymentComplete', 'Payment Complete');
                 premiumBtn.disabled = true;
-                statusDiv.querySelector("#turnMessage").textContent = "You have purchased a One Shot and moved to the front!";
+                statusDiv.querySelector("#turnMessage").textContent = getConfig('text.premiumPurchased', 'You have purchased a One Shot and moved to the front!');
                 startPolling(email);
             } else {
                 const data = await res.json();
-                alert(data.detail || "Unable to purchase One Shot");
+                alert(data.detail || getConfig('text.unableToPurchase', 'Unable to purchase One Shot'));
             }
         }
 
         actionBtn.addEventListener("click", () => {
             const email = emailInput.value.trim();
             if (!email) {
-                alert("Please enter a valid email");
+                alert(getConfig('text.pleaseEnterValidEmail', 'Please enter a valid email'));
                 return;
             }
 
@@ -151,11 +151,11 @@
 
         function updateButton() {
             if (inQueue) {
-                actionBtn.textContent = "Leave Queue";
+                actionBtn.textContent = getConfig('text.leaveButton', 'Leave Queue');
                 actionBtn.classList.add("leave");
                 emailInput.disabled = true;
             } else {
-                actionBtn.textContent = "Join Queue";
+                actionBtn.textContent = getConfig('text.joinButton', 'Join Queue');
                 actionBtn.classList.remove("leave");
                 emailInput.disabled = false;
             }
@@ -167,7 +167,7 @@
             emailInput.value = "";
             emailInput.disabled = false;
             updateButton();
-            statusDiv.querySelector("#turnMessage").textContent = "You have been scanned out of the queue.";
+            statusDiv.querySelector("#turnMessage").textContent = getConfig('text.scannedMessage', 'You have been scanned out of the queue.');
             document.getElementById("qrCodeContainer").innerHTML = "";
             clearInterval(intervalId);
         }
@@ -201,7 +201,7 @@
                                 
                                 if (currentGuest && currentGuest.guest_location === 'ready') {
                                     console.log('Guest is in ready pool, showing QR code');
-                                    turnMessage.textContent = "It's your turn! Please proceed to the attraction.";
+                                    turnMessage.textContent = getConfig('text.turnMessage', "It's your turn! Please proceed to the attraction.");
                                     qrContainer.innerHTML = "";
                                     new QRCode(qrContainer, {
                                         text: email,
@@ -211,7 +211,7 @@
                                 } else {
                                     console.log('Guest is not in ready pool, hiding QR code');
                                     const position = data.position + 1;
-                                    turnMessage.textContent = `You are in position ${position}. Please wait for your turn.`;
+                                    turnMessage.textContent = getConfig('text.waitingMessage', `You are in position ${position}. Please wait for your turn.`);
                                     qrContainer.innerHTML = "";
                                 }
                             })
@@ -219,7 +219,7 @@
                                 console.error('Error fetching status for QR code logic:', error);
                                 // Fallback: show QR code if position is 0
                                 if (data.position === 0) {
-                                    turnMessage.textContent = "It's your turn! Please proceed to the attraction.";
+                                    turnMessage.textContent = getConfig('text.turnMessage', "It's your turn! Please proceed to the attraction.");
                                     qrContainer.innerHTML = "";
                                     new QRCode(qrContainer, {
                                         text: email,

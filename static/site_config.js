@@ -2,9 +2,9 @@
 window.SITE_CONFIG = {
     // Branding
     brand: {
-        name: "Deli Queue",
+        name: "Deli Queue System",
         logo: "static/deliq_placeholder.png",
-        favicon: "static/deliq_placeholder.png"
+        paymentLogo: "static/accessoPay.png"
     },
 
     // Colors
@@ -14,12 +14,7 @@ window.SITE_CONFIG = {
         success: "#28a745",
         danger: "#dc3545",
         warning: "#ffc107",
-        info: "#17a2b8",
-        light: "#f8f9fa",
-        dark: "#343a40",
-        background: "#ffffff",
-        text: "#212529",
-        border: "#dee2e6"
+        info: "#17a2b8"
     },
 
     // Text Content
@@ -27,30 +22,41 @@ window.SITE_CONFIG = {
         // Guest App
         guestTitle: "Join the Queue!",
         guestSubtitle: "Join the virtual queue and enjoy our other attractions while you wait or upgrade and skip the line!",
-        joinButton: "Join queue",
+        joinButton: "Join Queue",
         leaveButton: "Leave Queue",
         premiumButton: "Skip the Line",
         premiumUnavailable: "Premium unavailable",
         turnMessage: "It's your turn! Please proceed to the attraction.",
         scannedMessage: "You have been scanned out of the queue.",
-        
-        // Admin Panel
-        adminTitle: "Admin Control Panel",
-        queueStatus: "Queue status:",
-        guestCount: "Guests in queue:",
-        venueStatus: "Guests in venue:",
-        premiumLimit: "Premium limit:",
-        oneShotPrice: "One Shot price:",
-        readyPool: "Ready pool:",
+        paymentComplete: "Payment Complete",
+        alreadyPremium: "You are already in the premium queue.",
+        premiumPurchased: "You have purchased a One Shot and moved to the front!",
+        waitingMessage: "You are in position {position}. Please wait for your turn.",
         
         // Attendant App
         attendantTitle: "Venue Entry App",
         venueStatus: "Venue status:",
         queueStatus: "Queue status:",
+        guestCount: "Guests in queue:",
         nextGuest: "Next guest:",
+        readyPool: "Ready pool:",
         removeGuest: "Remove guest from queue",
         
-        // Payment
+        // Attendant App Error Messages
+        cameraAccessDenied: "Camera access denied. Please allow camera access and refresh the scanner.",
+        noCameraFound: "No camera found. Please connect a camera and refresh the scanner.",
+        cameraNotSupported: "Camera not supported. Please try a different device or browser.",
+        scannerError: "Scanner error occurred. Please refresh the scanner.",
+        cameraError: "Camera error: {error}",
+        scannerSetupError: "Error setting up scanner. Please try refreshing the scanner.",
+        scannerInitError: "Error initializing QR scanner. Please refresh the page.",
+        scannerCreateError: "Error creating QR scanner. Please try refreshing the scanner.",
+        
+        // Clicker App
+        clickerTitle: "Venue Exit Clicker",
+        guestsInVenue: "Guests in Venue:",
+        
+        // Payment Mock
         paymentTitle: "Mock Payment Page",
         paymentComplete: "Mock payment complete",
         
@@ -59,8 +65,6 @@ window.SITE_CONFIG = {
         apiBase: "API Base URL:",
         totalGuests: "Total Guests:",
         readyPoolStatus: "Ready Pool:",
-        venueStatus: "Venue Status:",
-        guestsInVenue: "Guests in Venue:",
         currentQueue: "Current Queue",
         noGuests: "No guests in queue",
         refreshStatus: "Refresh Status",
@@ -68,11 +72,10 @@ window.SITE_CONFIG = {
         openAttendant: "Open Attendant App",
         openGuest: "Open Guest App",
         
-        // Clicker App
-        clickerTitle: "Venue Exit Clicker",
-        guestLeft: "Guest Left Venue",
-        
-        // Admin Panel Additional
+        // Admin Control Panel
+        adminTitle: "Admin Control Panel",
+        premiumLimit: "Premium limit:",
+        oneShotPrice: "One Shot price:",
         siteConfigurationLabel: "Site Configuration",
         openCMSBtn: "Open Configuration CMS",
         
@@ -82,19 +85,17 @@ window.SITE_CONFIG = {
         queuesSection: "Queues",
         linksSection: "Links",
         configSection: "Config",
+        
+        // Section headers
         systemStatus: "System Status",
         queueManagement: "Queue Management",
         applicationLinks: "Application Links",
         siteConfiguration: "Site Configuration",
         
         // Status Items
-        queueStatus: "Queue Status",
         guestsInQueue: "Guests in Queue",
-        readyPool: "Ready Pool",
         readyPoolLimit: "Ready Pool Limit",
-        guestsInVenue: "Guests in Venue",
         venueCapacity: "Venue Capacity",
-        currentQueue: "Current Queue",
         noGuestsInQueue: "No guests in queue",
         
         // Queue Controls
@@ -138,61 +139,51 @@ window.SITE_CONFIG = {
         dailyResetQueue: "Daily Reset Queue",
         dailyResetHelp: "Clears all guests from queue while preserving configuration. Use at start of business day.",
         
-        // Links Section
+        // Legacy admin panel
         legacyAdminPanel: "Legacy Admin Panel (Deprecated)",
         legacyAdminDescription: "The old admin control panel is deprecated. All functionality has been moved to this unified control app. You can still access it for reference, but it may not work correctly with the current API.",
         openLegacyAdmin: "Open Legacy Admin Panel",
+        
+        // Application links
         guestApp: "Guest App",
         attendantApp: "Attendant App",
         clickerApp: "Clicker App",
         openGuestApp: "Open Guest App",
         openAttendantApp: "Open Attendant App",
         openClickerApp: "Open Clicker App",
-        qrCodePlaceholder: "QR Code will appear here",
-        loadingPlaceholder: "Loading...",
+        
+        // Icons
+        homeIcon: "🏠",
+        queuesIcon: "📋",
+        linksIcon: "🔗",
+        configIcon: "⚙️",
         
         // Configuration Management
         configurationManagement: "Configuration Management",
         configManagementHelp: "Use the interface below to manage site colors, text, and branding:",
         
-        // Navigation Icons
-        homeIcon: "🏠",
-        queuesIcon: "📋",
-        linksIcon: "🔗",
-        configIcon: "⚙️"
-    },
-
-    // Features
-    features: {
-        readyPool: false,
-        premiumQueue: false,
-        venueMode: false,
-        qrCodes: false,
-        paymentIntegration: false
-    },
-
-    // Defaults
-    defaults: {
-        premiumLimit: 0,
-        oneShotPrice: 5,
-        readyPoolLimit: 0,
-        venueCapacity: 0
+        // Placeholders
+        qrCodePlaceholder: "QR Code will appear here",
+        loadingPlaceholder: "Loading...",
+        
+        // Alert Messages
+        missingGuestEmail: "Missing guest email. Cannot proceed to payment.",
+        missingGuestEmailReturn: "Missing guest email. Cannot return to guest app.",
+        unableToPurchase: "Unable to purchase One Shot",
+        pleaseEnterValidEmail: "Please enter a valid email",
+        failedToAdvanceQueue: "Failed to advance queue.",
+        networkErrorAdvancing: "Network error occurred while advancing queue.",
+        noCamerasFound: "No cameras found",
+        errorShowingCameraSelection: "Error showing camera selection. Please try refreshing the scanner.",
+        errorUpdatingVenueCount: "Error updating venue count.",
+        networkErrorUpdatingVenue: "Network error occurred while updating venue count.",
+        failedDailyReset: "Failed to perform daily reset. Please try again."
     },
 
     // Images
     images: {
         logo: "static/deliq_placeholder.png",
-        paymentLogo: "static/accessoPay.png",
-        qrPlaceholder: "static/deliq_placeholder.png"
-    },
-
-    // Styling
-    styling: {
-        borderRadius: "16px",
-        buttonPadding: "10px 20px",
-        containerMaxWidth: "800px",
-        fontSize: "16px",
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+        paymentLogo: "static/accessoPay.png"
     }
 };
 

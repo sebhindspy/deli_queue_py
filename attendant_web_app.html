@@ -150,11 +150,11 @@
                 } else {
                     const error = await response.json();
                     console.error('Failed to advance queue:', error); // Debug log
-                    alert(error.detail || "Failed to advance queue.");
+                    alert(error.detail || getConfig('text.failedToAdvanceQueue', 'Failed to advance queue.'));
                 }
             } catch (error) {
                 console.error('Error advancing queue:', error);
-                alert("Network error occurred while advancing queue.");
+                alert(getConfig('text.networkErrorAdvancing', 'Network error occurred while advancing queue.'));
             }
         }
 
@@ -282,13 +282,13 @@
             const readerElement = document.getElementById("reader");
             
             if (error.name === 'NotAllowedError') {
-                readerElement.innerHTML = "<p>Camera access denied. Please allow camera access and refresh the scanner.</p>";
+                readerElement.innerHTML = "<p>" + getConfig('text.cameraAccessDenied', 'Camera access denied. Please allow camera access and refresh the scanner.') + "</p>";
             } else if (error.name === 'NotFoundError') {
-                readerElement.innerHTML = "<p>No camera found. Please connect a camera and refresh the scanner.</p>";
+                readerElement.innerHTML = "<p>" + getConfig('text.noCameraFound', 'No camera found. Please connect a camera and refresh the scanner.') + "</p>";
             } else if (error.name === 'NotSupportedError') {
-                readerElement.innerHTML = "<p>Camera not supported. Please try a different device or browser.</p>";
+                readerElement.innerHTML = "<p>" + getConfig('text.cameraNotSupported', 'Camera not supported. Please try a different device or browser.') + "</p>";
             } else {
-                readerElement.innerHTML = "<p>Scanner error occurred. Please refresh the scanner.</p>";
+                readerElement.innerHTML = "<p>" + getConfig('text.scannerError', 'Scanner error occurred. Please refresh the scanner.') + "</p>";
             }
         }
 
@@ -361,15 +361,15 @@
                                 .catch(permissionError => {
                                     console.error('Camera permission error:', permissionError);
                                     if (permissionError.name === 'NotAllowedError') {
-                                        readerElement.innerHTML = "<p>Camera access denied. Please allow camera access and refresh the scanner.</p>";
+                                        readerElement.innerHTML = "<p>" + getConfig('text.cameraAccessDenied', 'Camera access denied. Please allow camera access and refresh the scanner.') + "</p>";
                                         document.getElementById('scanner-status').textContent = 'Camera access denied';
                                         document.getElementById('scanner-status').style.color = '#dc3545';
                                     } else if (permissionError.name === 'NotFoundError') {
-                                        readerElement.innerHTML = "<p>No camera found. Please connect a camera and refresh the scanner.</p>";
+                                        readerElement.innerHTML = "<p>" + getConfig('text.noCameraFound', 'No camera found. Please connect a camera and refresh the scanner.') + "</p>";
                                         document.getElementById('scanner-status').textContent = 'No camera found';
                                         document.getElementById('scanner-status').style.color = '#dc3545';
                                     } else {
-                                        readerElement.innerHTML = "<p>Camera error: " + permissionError.message + "</p>";
+                                        readerElement.innerHTML = "<p>" + getConfig('text.cameraError', 'Camera error: {error}').replace('{error}', permissionError.message) + "</p>";
                                         document.getElementById('scanner-status').textContent = 'Camera error';
                                         document.getElementById('scanner-status').style.color = '#dc3545';
                                     }
@@ -380,7 +380,7 @@
                         }
                     } catch (error) {
                         console.error('Error in scanner setup:', error);
-                        readerElement.innerHTML = "<p>Error setting up scanner. Please try refreshing the scanner.</p>";
+                                                    readerElement.innerHTML = "<p>" + getConfig('text.scannerSetupError', 'Error setting up scanner. Please try refreshing the scanner.') + "</p>";
                         document.getElementById('scanner-status').textContent = 'Setup error';
                         document.getElementById('scanner-status').style.color = '#dc3545';
                     }
@@ -388,7 +388,7 @@
                 
             } catch (error) {
                 console.error('Error in scanner initialization:', error);
-                document.getElementById("reader").innerHTML = "<p>Error initializing QR scanner. Please refresh the page.</p>";
+                                        document.getElementById("reader").innerHTML = "<p>" + getConfig('text.scannerInitError', 'Error initializing QR scanner. Please refresh the page.') + "</p>";
                 document.getElementById('scanner-status').textContent = 'Initialization failed';
                 document.getElementById('scanner-status').style.color = '#dc3545';
             }
@@ -438,7 +438,7 @@
                 
             } catch (error) {
                 console.error('Error creating scanner:', error);
-                document.getElementById("reader").innerHTML = "<p>Error creating QR scanner. Please try refreshing the scanner.</p>";
+                                        document.getElementById("reader").innerHTML = "<p>" + getConfig('text.scannerCreateError', 'Error creating QR scanner. Please try refreshing the scanner.') + "</p>";
                 document.getElementById('scanner-status').textContent = 'Scanner creation failed';
                 document.getElementById('scanner-status').style.color = '#dc3545';
             }
@@ -455,7 +455,7 @@
                 const videoDevices = devices.filter(device => device.kind === 'videoinput');
                 
                 if (videoDevices.length === 0) {
-                    alert('No cameras found');
+                    alert(getConfig('text.noCamerasFound', 'No cameras found'));
                     return;
                 }
                 
@@ -479,7 +479,7 @@
                 }
             } catch (error) {
                 console.error('Error showing camera selection:', error);
-                alert('Error showing camera selection. Please try refreshing the scanner.');
+                alert(getConfig('text.errorShowingCameraSelection', 'Error showing camera selection. Please try refreshing the scanner.'));
             }
         }
 

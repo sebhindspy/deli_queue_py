@@ -25,6 +25,22 @@
         const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
         const api = (path) => `${API_BASE}${path}`;
 
+        // Helper function to get configuration values
+        function getConfig(key, defaultValue = '') {
+            try {
+                const keys = key.split('.');
+                let value = window.SITE_CONFIG || {};
+                for (const k of keys) {
+                    value = value[k];
+                    if (value === undefined) return defaultValue;
+                }
+                return value || defaultValue;
+            } catch (error) {
+                console.warn('Error getting config for key:', key, error);
+                return defaultValue;
+            }
+        }
+
         async function fetchVenueStatus() {
             try {
                 const response = await fetch(api('/status'));
@@ -76,8 +92,13 @@
         // Initial status fetch
         fetchVenueStatus();
         
-        // Refresh status every 5 seconds for automatic updates
-        setInterval(fetchVenueStatus, 3000);
+        // Refresh status every 3 seconds for automatic updates
+        const intervalId = setInterval(() => {
+            console.log('Auto-refresh triggered at:', new Date().toLocaleTimeString());
+            fetchVenueStatus();
+        }, 3000);
+        
+        console.log('Auto-refresh interval set with ID:', intervalId);
         
         // Also refresh status when page becomes visible (user returns to tab)
         document.addEventListener('visibilitychange', () => {
@@ -95,21 +116,24 @@
 
         // Apply site configuration to UI elements
         function applySiteConfig() {
-            // Branding
-            document.title = getConfig('brand.name', 'Clicker App');
-            
-            // Text content
-            document.getElementById('pageTitle').textContent = getConfig('text.clickerTitle', 'Venue Exit Clicker');
-            document.getElementById('venueStatusLabel').textContent = getConfig('text.venueStatus', 'Venue Status:');
-            document.getElementById('guestsInVenueLabel').textContent = getConfig('text.guestsInVenue', 'Guests in Venue:');
-            document.getElementById('decrementBtn').textContent = getConfig('text.guestLeft', 'Guest Left Venue');
-            
-            // Apply colors if CSS custom properties are supported
-            if (CSS.supports('color', 'var(--custom-property)')) {
-                document.documentElement.style.setProperty('--primary-color', getConfig('colors.primary', '#007bff'));
-                document.documentElement.style.setProperty('--secondary-color', getConfig('colors.secondary', '#6c757d'));
-                document.documentElement.style.setProperty('--success-color', getConfig('colors.success', '#28a745'));
-                document.documentElement.style.setProperty('--danger-color', getConfig('colors.danger', '#dc3545'));
+            try {
+                // Branding
+                document.title = getConfig('brand.name', 'Clicker App');
+                
+                // Text content
+                document.getElementById('pageTitle').textContent = getConfig('text.clickerTitle', 'Venue Exit Clicker');
+                document.getElementById('venueStatusLabel').textContent = getConfig('text.venueStatus', 'Venue Status:');
+                document.getElementById('guestsInVenueLabel').textContent = getConfig('text.guestsInVenue', 'Guests in Venue:');
+                
+                // Apply colors if CSS custom properties are supported
+                if (CSS.supports('color', 'var(--custom-property)')) {
+                    document.documentElement.style.setProperty('--primary-color', getConfig('colors.primary', '#007bff'));
+                    document.documentElement.style.setProperty('--secondary-color', getConfig('colors.secondary', '#6c757d'));
+                    document.documentElement.style.setProperty('--success-color', getConfig('colors.success', '#28a745'));
+                    document.documentElement.style.setProperty('--danger-color', getConfig('colors.danger', '#dc3545'));
+                }
+            } catch (error) {
+                console.warn('Error applying site config:', error);
             }
         }
     </script>

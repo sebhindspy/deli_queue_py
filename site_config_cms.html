@@ -464,6 +464,7 @@ window.getConfig = function(path, defaultValue = '') {
                 root.style.setProperty('--primary-color', config.colors.primary);
                 root.style.setProperty('--primary-hover', config.colors.primaryHover || config.colors.primary);
                 root.style.setProperty('--primary-dark', config.colors.primaryDark || config.colors.primary);
+                root.style.setProperty('--primary-text', config.colors.primaryText || '#ffffff');
             }
             
             // Update secondary colors
@@ -471,6 +472,7 @@ window.getConfig = function(path, defaultValue = '') {
                 root.style.setProperty('--secondary-color', config.colors.secondary);
                 root.style.setProperty('--secondary-hover', config.colors.secondaryHover || config.colors.secondary);
                 root.style.setProperty('--secondary-dark', config.colors.secondaryDark || config.colors.secondary);
+                root.style.setProperty('--secondary-text', config.colors.secondaryText || '#ffffff');
             }
             
             // Update success colors

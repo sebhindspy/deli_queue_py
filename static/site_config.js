@@ -10,11 +10,25 @@ window.SITE_CONFIG = {
     // Colors
     colors: {
         primary: "#007bff",
+        primaryHover: "#0056b3",
+        primaryDark: "#0056b3",
+        primaryText: "#ffffff",
         secondary: "#6c757d",
+        secondaryHover: "#545b62",
+        secondaryDark: "#545b62",
+        secondaryText: "#212529",
         success: "#28a745",
+        successHover: "#1e7e34",
+        successDark: "#1e7e34",
         danger: "#dc3545",
+        dangerHover: "#c82333",
+        dangerDark: "#c82333",
         warning: "#ffc107",
-        info: "#17a2b8"
+        warningHover: "#e0a800",
+        warningDark: "#e0a800",
+        info: "#17a2b8",
+        infoHover: "#138496",
+        infoDark: "#138496"
     },
 
     // Text Content

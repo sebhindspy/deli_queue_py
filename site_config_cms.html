@@ -60,6 +60,9 @@
         // Helper function to construct API URLs
         function api(endpoint) {
             const base = window.API_BASE || '';
+            console.log('api() called with endpoint:', endpoint);
+            console.log('window.API_BASE:', window.API_BASE);
+            console.log('Full URL:', base + endpoint);
             return base + endpoint;
         }
         
@@ -209,6 +212,8 @@
             }
             
             try {
+                console.log('Starting saveConfig for:', customerName);
+                
                 // Create the config file content
                 const configContent = `// Site Configuration for ${customerName}
 window.SITE_CONFIG = ${JSON.stringify(currentConfig, null, 4)};
@@ -229,27 +234,44 @@ window.getConfig = function(path, defaultValue = '') {
     return value;
 };`;
                 
+                console.log('Config content created, length:', configContent.length);
+                
                 // Save to localStorage for immediate use
                 localStorage.setItem(`${customerName}_config.js`, configContent);
+                console.log('Saved to localStorage');
                 
                 // Upload to S3
+                console.log('Starting S3 upload...');
+                const uploadData = {
+                    customerName: customerName,
+                    configContent: configContent
+                };
+                console.log('Upload data:', uploadData);
+                
                 try {
-                    const response = await fetch(api('/upload-config'), {
+                    const apiUrl = api('/upload-config');
+                    console.log('API URL:', apiUrl);
+                    
+                    const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            customerName: customerName,
-                            configContent: configContent
-                        })
+                        body: JSON.stringify(uploadData)
                     });
                     
+                    console.log('S3 upload response status:', response.status);
+                    console.log('S3 upload response ok:', response.ok);
+                    
                     if (response.ok) {
+                        const result = await response.json();
+                        console.log('S3 upload success result:', result);
                         showStatus(`Configuration saved to S3 for ${customerName}`, 'success');
                     } else {
                         const errorData = await response.json();
+                        console.error('S3 upload failed:', errorData);
                         showStatus(`Saved locally, but S3 upload failed: ${errorData.detail}`, 'warning');
                     }
                 } catch (error) {
+                    console.error('S3 upload error:', error);
                     showStatus(`Saved locally, but S3 upload failed: ${error.message}`, 'warning');
                 }
                 
@@ -257,6 +279,7 @@ window.getConfig = function(path, defaultValue = '') {
                 await loadAvailableConfigs();
                 
             } catch (error) {
+                console.error('saveConfig error:', error);
                 showStatus(`Error saving configuration: ${error.message}`, 'error');
             }
         }
@@ -337,25 +360,56 @@ window.getConfig = function(path, defaultValue = '') {
         }
 
                 // Apply the selected configuration
-        function applyConfig() {
+        async function applyConfig() {
             const selectedConfig = document.getElementById('configSelector').value;
+            console.log('Applying config:', selectedConfig);
 
             if (selectedConfig === 'default') {
                 // Apply default config
                 window.SITE_CONFIG = JSON.parse(JSON.stringify(defaultConfig));
+                console.log('Applied default config:', window.SITE_CONFIG);
                 showStatus(`Default configuration applied`, 'success');
             } else {
                 try {
-                    const savedConfig = localStorage.getItem(`${selectedConfig}_config.js`);
+                    // First try localStorage
+                    let savedConfig = localStorage.getItem(`${selectedConfig}_config.js`);
+                    console.log('Saved config from localStorage:', savedConfig ? 'Found' : 'Not found');
+                    
+                    // If not in localStorage, try to load from S3
+                    if (!savedConfig) {
+                        console.log('Config not in localStorage, loading from S3...');
+                        try {
+                            const response = await fetch(api(`/download-config/${selectedConfig}`));
+                            if (response.ok) {
+                                const data = await response.json();
+                                savedConfig = data.configContent;
+                                console.log('Loaded config from S3:', savedConfig ? 'Success' : 'Failed');
+                                
+                                // Save to localStorage for future use
+                                localStorage.setItem(`${selectedConfig}_config.js`, savedConfig);
+                            } else {
+                                throw new Error(`Failed to load config from S3: ${response.status}`);
+                            }
+                        } catch (s3Error) {
+                            console.error('Error loading from S3:', s3Error);
+                            showStatus(`Failed to load configuration from S3: ${s3Error.message}`, 'error');
+                            return;
+                        }
+                    }
+                    
                     if (savedConfig) {
                         // Extract and apply the SITE_CONFIG
                         const configMatch = savedConfig.match(/window\.SITE_CONFIG\s*=\s*({[\s\S]*?});/);
                         if (configMatch) {
                             const customerConfig = JSON.parse(configMatch[1]);
+                            console.log('Parsed customer config:', customerConfig);
+                            
                             window.SITE_CONFIG = customerConfig;
+                            console.log('Updated window.SITE_CONFIG:', window.SITE_CONFIG);
                             
                             // Update CSS variables to reflect the new configuration
                             updateCSSVariables(customerConfig);
+                            console.log('CSS variables updated');
                             
                             showStatus(`Configuration ${selectedConfig} applied successfully`, 'success');
 
@@ -369,8 +423,11 @@ window.getConfig = function(path, defaultValue = '') {
                         } else {
                             throw new Error('Invalid configuration format');
                         }
+                    } else {
+                        showStatus(`Configuration ${selectedConfig} not found anywhere.`, 'error');
                     }
                 } catch (error) {
+                    console.error('Error applying config:', error);
                     showStatus(`Error applying configuration: ${error.message}`, 'error');
                 }
             }
@@ -378,8 +435,11 @@ window.getConfig = function(path, defaultValue = '') {
 
         // Force refresh of components to apply new styles
         function refreshComponents() {
+            console.log('refreshComponents function called');
+            
             // Refresh any iframes
             const iframes = document.querySelectorAll('iframe');
+            console.log('Found iframes:', iframes.length);
             iframes.forEach(iframe => {
                 if (iframe.src) {
                     iframe.src = iframe.src;
@@ -391,6 +451,7 @@ window.getConfig = function(path, defaultValue = '') {
             document.body.offsetHeight; // Trigger reflow
             document.body.style.display = '';
             
+            console.log('Components refresh completed');
             showStatus('Components refreshed to apply new styles', 'info');
         }
 

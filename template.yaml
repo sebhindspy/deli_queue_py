@@ -33,12 +33,15 @@ Conditions:
   UseDynamoDB: !Equals [!Ref EnableDynamoDB, "true"]
 
 Resources:
-  # External S3 bucket for customer configurations
+  # Reference to existing S3 bucket for customer configurations
   # This bucket must be created manually and will persist across deployments
-  ConfigStorageBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref ConfigBucketName
+  # Temporarily commented out to allow deployment - will import later
+  # ConfigStorageBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Ref ConfigBucketName
+  #   DeletionPolicy: Retain
+  #   UpdateReplacePolicy: Retain
 
   QueueTable:
     Type: AWS::DynamoDB::Table
@@ -72,13 +75,13 @@ Resources:
           DDB_TABLE_NAME: !If [UseDynamoDB, !Ref QueueTable, ""]
           CORS_ORIGINS: "*"
           S3_BUCKET_NAME: !Ref S3BucketName
-          CONFIG_BUCKET_NAME: !Ref ConfigStorageBucket
+          CONFIG_BUCKET_NAME: !Ref ConfigBucketName
       Policies:
         - AWSLambdaBasicExecutionRole
         - S3CrudPolicy:
             BucketName: !Ref S3BucketName
         - S3CrudPolicy:
-            BucketName: !Ref ConfigStorageBucket
+            BucketName: !Ref ConfigBucketName
         - !If
           - UseDynamoDB
           - DynamoDBCrudPolicy:
@@ -99,7 +102,7 @@ Outputs:
     Value: !Ref S3BucketName
   ConfigBucket:
     Description: S3 bucket name for customer configurations
-    Value: !Ref ConfigStorageBucket
+    Value: !Ref ConfigBucketName
   DynamoDBTable:
     Condition: UseDynamoDB
     Value: !Ref QueueTable

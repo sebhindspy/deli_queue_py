@@ -24,29 +24,21 @@ Parameters:
     Type: String
     Default: "deli-queue-static"
     Description: "Name of existing S3 bucket for static files"
+  ConfigBucketName:
+    Type: String
+    Default: "deli-queue-configs-persistent"
+    Description: "Name of existing S3 bucket for customer configurations (must be created manually)"
 
 Conditions:
   UseDynamoDB: !Equals [!Ref EnableDynamoDB, "true"]
 
 Resources:
-  # New S3 bucket specifically for customer configurations
+  # External S3 bucket for customer configurations
+  # This bucket must be created manually and will persist across deployments
   ConfigStorageBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "deli-queue-configs-${AWS::StackName}-${AWS::Region}-${AWS::AccountId}"
-      VersioningConfiguration:
-        Status: Enabled
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      LifecycleConfiguration:
-        Rules:
-          - Id: DeleteOldVersions
-            Status: Enabled
-            NoncurrentVersionExpiration:
-              NoncurrentDays: 30
+      BucketName: !Ref ConfigBucketName
 
   QueueTable:
     Type: AWS::DynamoDB::Table

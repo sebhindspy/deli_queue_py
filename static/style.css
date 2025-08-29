@@ -345,6 +345,7 @@ h3 {
 .queue-controls {
     display: flex;
     flex-wrap: wrap;
+
 }
 
 /* Links Section */
@@ -386,7 +387,7 @@ h3 {
 /* Config Section */
 .config-iframe {
     width: 100%;
-    height: 600px;
+    height: 750px;
     border: 1px solid var(--primary-color);
     border-radius: var(--border-radius-md);
 }

@@ -195,13 +195,13 @@ h3 {
 
 /* Button Styles */
 .btn {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
     border: none;
     border-radius: var(--border-radius-md);
     cursor: pointer;
     font-size: var(--font-size-base);
     /*margin-right: var(--spacing-sm);*/
-    margin-bottom: var(--spacing-md);
+    margin-top: var(--spacing-md);
     transition: all 0.3s ease;
     font-weight: 500;
     text-decoration: none;
@@ -413,11 +413,12 @@ button:not(.btn) {
     padding: var(--spacing-sm) var(--spacing-lg);
     border-radius: var(--border-radius-sm);
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
     margin: 0.5rem 0;
     transition: all 0.3s ease;
     font-weight: 500;
     min-width: 80px;
+    width: 100%;
 }
 
 button:not(.btn):hover {
@@ -527,7 +528,7 @@ button:disabled {
 
 /* CMS Specific Styles */
 .cms-container {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
     padding: var(--spacing-lg);
 }
@@ -559,23 +560,23 @@ button:disabled {
 .input-field {
     width: 100%;
     padding: 8px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--primary-color);
+    border-radius: var(--border-radius-md);
     font-size: 14px;
 }
 
 .input-field:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--primary-dark);
     box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
 }
 
 .update-btn {
     background: var(--primary-color);
-    color: white;
+    color: var(--primary-text);
     border: none;
     padding: 8px 16px;
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--border-radius-md);
     cursor: pointer;
     font-size: 14px;
 }
@@ -612,8 +613,8 @@ button:disabled {
 .control-group select,
 .control-group input {
     padding: 8px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--primary-color);
+    border-radius: var(--border-radius-md);
     margin-left: var(--spacing-sm);
     width: 240px !important;
 }

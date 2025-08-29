@@ -26,7 +26,7 @@ Parameters:
     Description: "Name of existing S3 bucket for static files"
   ConfigBucketName:
     Type: String
-    Default: "deli-queue-configs-persistent"
+    Default: "deli-queue-configs-deli-queue-eu-north-1-299295684159"
     Description: "Name of existing S3 bucket for customer configurations (must be created manually)"
 
 Conditions:

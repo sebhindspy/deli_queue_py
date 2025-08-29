@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 import json
 import os
+import boto3
 from mangum import Mangum
 
 # my modules
@@ -145,10 +146,8 @@ async def upload_config(request: Request):
             )
 
         # Upload to S3
-        import boto3
-
         s3_client = boto3.client("s3")
-        bucket_name = os.environ.get("S3_BUCKET_NAME", "deli-queue-static")
+        bucket_name = os.environ.get("CONFIG_BUCKET_NAME", "deli-queue-configs")
 
         s3_client.put_object(
             Bucket=bucket_name,
@@ -171,10 +170,8 @@ async def upload_config(request: Request):
 async def list_configs():
     """List available customer configurations from S3"""
     try:
-        import boto3
-
         s3_client = boto3.client("s3")
-        bucket_name = os.environ.get("S3_BUCKET_NAME", "deli-queue-static")
+        bucket_name = os.environ.get("CONFIG_BUCKET_NAME", "deli-queue-configs")
 
         # List objects with configs/ prefix
         response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix="configs/")
@@ -201,10 +198,8 @@ async def list_configs():
 async def download_config(customer_name: str):
     """Download customer configuration from S3"""
     try:
-        import boto3
-
         s3_client = boto3.client("s3")
-        bucket_name = os.environ.get("S3_BUCKET_NAME", "deli-queue-static")
+        bucket_name = os.environ.get("CONFIG_BUCKET_NAME", "deli-queue-configs")
 
         response = s3_client.get_object(
             Bucket=bucket_name, Key=f"configs/{customer_name}_config.js"
@@ -217,6 +212,47 @@ async def download_config(customer_name: str):
         print(f"Error downloading config from S3: {str(e)}")
         raise HTTPException(
             status_code=404, detail=f"Configuration not found for {customer_name}"
+        )
+
+
+@app.post("/migrate-configs")
+async def migrate_configs():
+    """Migrate existing configurations from old S3 bucket to new config bucket"""
+    try:
+        old_s3_client = boto3.client("s3")
+        new_s3_client = boto3.client("s3")
+
+        old_bucket = os.environ.get("S3_BUCKET_NAME", "deli-queue-static")
+        new_bucket = os.environ.get("CONFIG_BUCKET_NAME", "deli-queue-configs")
+
+        # List objects with configs/ prefix from old bucket
+        response = old_s3_client.list_objects_v2(Bucket=old_bucket, Prefix="configs/")
+
+        migrated_count = 0
+        if "Contents" in response:
+            for obj in response["Contents"]:
+                key = obj["Key"]
+                if key.endswith("_config.js"):
+                    # Download from old bucket
+                    old_response = old_s3_client.get_object(Bucket=old_bucket, Key=key)
+                    config_content = old_response["Body"].read()
+
+                    # Upload to new bucket
+                    new_s3_client.put_object(
+                        Bucket=new_bucket,
+                        Key=key,
+                        Body=config_content,
+                        ContentType="application/javascript",
+                        CacheControl="no-cache",
+                    )
+                    migrated_count += 1
+
+        return {"message": f"Migrated {migrated_count} configurations to new bucket"}
+
+    except Exception as e:
+        print(f"Error migrating configs: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to migrate configs: {str(e)}"
         )
 
 

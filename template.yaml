@@ -29,6 +29,25 @@ Conditions:
   UseDynamoDB: !Equals [!Ref EnableDynamoDB, "true"]
 
 Resources:
+  # New S3 bucket specifically for customer configurations
+  ConfigStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "deli-queue-configs-${AWS::StackName}-${AWS::Region}-${AWS::AccountId}"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldVersions
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30
+
   QueueTable:
     Type: AWS::DynamoDB::Table
     Condition: UseDynamoDB
@@ -61,10 +80,13 @@ Resources:
           DDB_TABLE_NAME: !If [UseDynamoDB, !Ref QueueTable, ""]
           CORS_ORIGINS: "*"
           S3_BUCKET_NAME: !Ref S3BucketName
+          CONFIG_BUCKET_NAME: !Ref ConfigStorageBucket
       Policies:
         - AWSLambdaBasicExecutionRole
         - S3CrudPolicy:
             BucketName: !Ref S3BucketName
+        - S3CrudPolicy:
+            BucketName: !Ref ConfigStorageBucket
         - !If
           - UseDynamoDB
           - DynamoDBCrudPolicy:
@@ -83,6 +105,9 @@ Outputs:
   S3Bucket:
     Description: S3 bucket name for static files and configs
     Value: !Ref S3BucketName
+  ConfigBucket:
+    Description: S3 bucket name for customer configurations
+    Value: !Ref ConfigStorageBucket
   DynamoDBTable:
     Condition: UseDynamoDB
     Value: !Ref QueueTable

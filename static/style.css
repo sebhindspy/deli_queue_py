@@ -19,9 +19,13 @@
     --danger-hover: #c82333;
     --danger-dark: #c82333;
     
-    --warning-color: #ffc107;
-    --warning-hover: #e0a800;
-    --warning-dark: #e0a800;
+          --warning-color: #ffc107;
+      --warning-hover: #e0a800;
+      --warning-dark: #e0a800;
+      
+      --info-color: #17a2b8;
+      --info-hover: #138496;
+      --info-dark: #138496;
     
     /* Neutral Colors */
     --background-color: #ffffff;
@@ -228,11 +232,20 @@ h3 {
     color: var(--text-color);
 }
 
-.btn-warning:hover {
-    background-color: var(--warning-hover);
-}
+  .btn-warning:hover {
+      background-color: var(--warning-hover);
+  }
 
-.btn-secondary {
+  .btn-info {
+      background-color: var(--info-color);
+      color: var(--text-color);
+  }
+
+  .btn-info:hover {
+      background-color: var(--info-hover);
+  }
+
+  .btn-secondary {
     background-color: var(--secondary-color);
 }
 

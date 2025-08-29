@@ -31,6 +31,7 @@
                     <option value="default">Default Configuration</option>
                 </select>
                 <button onclick="applyConfig()">Apply Selected Config</button>
+                <button onclick="refreshComponents()" class="btn btn-info">Refresh Components</button>
                 <!-- <button onclick="resetToDefault()">Reset to Default</button> -->
             </div>
         </div>
@@ -77,6 +78,9 @@
         function loadDefaultConfig() {
             defaultConfig = JSON.parse(JSON.stringify(window.SITE_CONFIG));
             currentConfig = JSON.parse(JSON.stringify(defaultConfig));
+            
+            // Apply CSS variables for the default configuration
+            updateCSSVariables(defaultConfig);
         }
 
         // Load available customer configurations
@@ -187,6 +191,12 @@
         // Update configuration value
         function updateConfigValue(path, value) {
             setNestedValue(currentConfig, path, value);
+            
+            // If this is a color change, update CSS variables immediately
+            if (path.startsWith('colors.')) {
+                updateCSSVariables(currentConfig);
+            }
+            
             showStatus('Configuration updated', 'success');
         }
 
@@ -319,13 +329,17 @@ window.getConfig = function(path, defaultValue = '') {
             }
             
             generateConfigTable();
+            
+            // Apply CSS variables for the loaded configuration
+            updateCSSVariables(currentConfig);
+            
             showStatus(`Configuration loaded: ${selectedConfig}`, 'success');
         }
 
-        // Apply the selected configuration
+                // Apply the selected configuration
         function applyConfig() {
             const selectedConfig = document.getElementById('configSelector').value;
-            
+
             if (selectedConfig === 'default') {
                 // Apply default config
                 window.SITE_CONFIG = JSON.parse(JSON.stringify(defaultConfig));
@@ -339,12 +353,19 @@ window.getConfig = function(path, defaultValue = '') {
                         if (configMatch) {
                             const customerConfig = JSON.parse(configMatch[1]);
                             window.SITE_CONFIG = customerConfig;
-                            showStatus(`Configuration ${selectedConfig} applied successfully`, 'success');
                             
+                            // Update CSS variables to reflect the new configuration
+                            updateCSSVariables(customerConfig);
+                            
+                            showStatus(`Configuration ${selectedConfig} applied successfully`, 'success');
+
                             // Trigger a custom event to notify other pages
                             window.dispatchEvent(new CustomEvent('siteConfigChanged', {
                                 detail: { config: customerConfig, name: selectedConfig }
                             }));
+                            
+                            // Force refresh of any iframes or components that might be cached
+                            refreshComponents();
                         } else {
                             throw new Error('Invalid configuration format');
                         }
@@ -352,6 +373,71 @@ window.getConfig = function(path, defaultValue = '') {
                 } catch (error) {
                     showStatus(`Error applying configuration: ${error.message}`, 'error');
                 }
+            }
+        }
+
+        // Force refresh of components to apply new styles
+        function refreshComponents() {
+            // Refresh any iframes
+            const iframes = document.querySelectorAll('iframe');
+            iframes.forEach(iframe => {
+                if (iframe.src) {
+                    iframe.src = iframe.src;
+                }
+            });
+            
+            // Force a repaint of the current page
+            document.body.style.display = 'none';
+            document.body.offsetHeight; // Trigger reflow
+            document.body.style.display = '';
+            
+            showStatus('Components refreshed to apply new styles', 'info');
+        }
+
+        // Update CSS variables based on configuration
+        function updateCSSVariables(config) {
+            const root = document.documentElement;
+            
+            // Update primary colors
+            if (config.colors && config.colors.primary) {
+                root.style.setProperty('--primary-color', config.colors.primary);
+                root.style.setProperty('--primary-hover', config.colors.primaryHover || config.colors.primary);
+                root.style.setProperty('--primary-dark', config.colors.primaryDark || config.colors.primary);
+            }
+            
+            // Update secondary colors
+            if (config.colors && config.colors.secondary) {
+                root.style.setProperty('--secondary-color', config.colors.secondary);
+                root.style.setProperty('--secondary-hover', config.colors.secondaryHover || config.colors.secondary);
+                root.style.setProperty('--secondary-dark', config.colors.secondaryDark || config.colors.secondary);
+            }
+            
+            // Update success colors
+            if (config.colors && config.colors.success) {
+                root.style.setProperty('--success-color', config.colors.success);
+                root.style.setProperty('--success-hover', config.colors.successHover || config.colors.success);
+                root.style.setProperty('--success-dark', config.colors.successDark || config.colors.success);
+            }
+            
+            // Update danger colors
+            if (config.colors && config.colors.danger) {
+                root.style.setProperty('--danger-color', config.colors.danger);
+                root.style.setProperty('--danger-hover', config.colors.dangerHover || config.colors.danger);
+                root.style.setProperty('--danger-dark', config.colors.dangerDark || config.colors.danger);
+            }
+            
+            // Update warning colors
+            if (config.colors && config.colors.warning) {
+                root.style.setProperty('--warning-color', config.colors.warning);
+                root.style.setProperty('--warning-hover', config.colors.warningHover || config.colors.warning);
+                root.style.setProperty('--warning-dark', config.colors.warningDark || config.colors.warning);
+            }
+            
+            // Update info colors
+            if (config.colors && config.colors.info) {
+                root.style.setProperty('--info-color', config.colors.info);
+                root.style.setProperty('--info-hover', config.colors.infoHover || config.colors.info);
+                root.style.setProperty('--info-dark', config.colors.infoDark || config.colors.info);
             }
         }
 

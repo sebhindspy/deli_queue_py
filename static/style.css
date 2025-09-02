@@ -230,6 +230,16 @@ h3 {
     box-shadow: var(--shadow-sm);
 }
 
+.btn-primary:disabled {
+    background-color: var(--secondary-color);
+    color: var(--secondary-text);
+    border-color: var(--secondary-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+}
+
 /* Secondary Button - Outline style */
 .btn-secondary {
     background-color: transparent;
@@ -247,6 +257,16 @@ h3 {
 .btn-secondary:active {
     transform: translateY(0);
     box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:disabled {
+    background-color: transparent;
+    color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
 }
 
 .btn-primary {
@@ -271,6 +291,16 @@ h3 {
     box-shadow: var(--shadow-md);
 }
 
+.btn-success:disabled {
+    background-color: var(--secondary-color);
+    color: var(--secondary-text);
+    border-color: var(--secondary-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+}
+
 /* Danger Button */
 .btn-danger {
     background-color: var(--danger-color);
@@ -283,6 +313,16 @@ h3 {
     border-color: var(--danger-hover);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
+}
+
+.btn-danger:disabled {
+    background-color: var(--secondary-color);
+    color: var(--secondary-text);
+    border-color: var(--secondary-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
 }
 
 /* Warning Button */
@@ -299,6 +339,16 @@ h3 {
     box-shadow: var(--shadow-md);
 }
 
+.btn-warning:disabled {
+    background-color: var(--secondary-color);
+    color: var(--secondary-text);
+    border-color: var(--secondary-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+}
+
 /* Info Button */
 .btn-info {
     background-color: var(--info-color);
@@ -311,6 +361,16 @@ h3 {
     border-color: var(--info-hover);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
+}
+
+.btn-info:disabled {
+    background-color: var(--secondary-color);
+    color: var(--secondary-text);
+    border-color: var(--secondary-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
 }
 
 /* Status Grid */

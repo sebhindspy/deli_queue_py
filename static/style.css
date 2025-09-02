@@ -415,6 +415,27 @@ h3 {
     gap: var(--spacing-lg);
 }
 
+/* Queues Section */
+.queues-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Responsive grid for smaller screens */
+@media (max-width: 1200px) {
+    .queues-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .queues-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .link-card {
     background: var(--card-bg);
     padding: var(--spacing-lg);

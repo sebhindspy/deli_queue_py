@@ -76,87 +76,93 @@
                     <h2 id="queue-management-title">Queue Management</h2>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header" id="queue-controls-header">Queue Controls</div>
-                    <div class="queue-controls">
-                        <button class="btn btn-success" id="open-queue">Open Queue</button>
-                        <button class="btn btn-danger" id="close-queue">Close Queue</button>
-                        <button class="btn btn-warning" id="reset-queue">Reset Queue</button>
+                <!-- Top Row: Queue Controls, Daily Operations, Demo Mode -->
+                <div class="queues-grid">
+                    <div class="card">
+                        <div class="card-header" id="queue-controls-header">Queue Controls</div>
+                        <div class="queue-controls">
+                            <button class="btn btn-success" id="open-queue">Open Queue</button>
+                            <button class="btn btn-danger" id="close-queue">Close Queue</button>
+                            <button class="btn btn-warning" id="reset-queue">Reset Queue</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">Daily Operations</div>
+                        <div class="form-group">
+                            <button onclick="dailyReset()" class="btn btn-danger">Daily Reset Queue</button>
+                            <p class="help-text">Clears all guests from queue while preserving configuration. Use at start of business day.</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header" id="demo-mode-header">Demo Mode</div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <label for="mock-count-input" id="mock-guests-label">Number of mock guests:</label>
+                            <input type="number" id="mock-count-input" min="1" max="100" style="width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <button class="btn btn-primary" id="mock-guests-btn">Insert Mock Guests</button>
+                            <button class="btn btn-warning" id="reset-mock-counter-btn">Reset Counter</button>
+                        </div>
+                        <p style="margin-top: 10px; color: #666; font-size: 0.9rem;" id="mock-guests-help">
+                            Mock guests get unique names (mock0, mock1, mock2...). Use "Reset Counter" to start over from 0.
+                        </p>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header" id="demo-mode-header">Demo Mode</div>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                        <label for="mock-count-input" id="mock-guests-label">Number of mock guests:</label>
-                        <input type="number" id="mock-count-input" min="1" max="100" style="width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <button class="btn btn-primary" id="mock-guests-btn">Insert Mock Guests</button>
-                        <button class="btn btn-warning" id="reset-mock-counter-btn">Reset Counter</button>
+                <!-- Bottom Row: Ready Queue, Premium Access, Venue Mode -->
+                <div class="queues-grid">
+                    <div class="card">
+                        <div class="card-header">Ready Pool Configuration</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label for="ready-pool-input">Ready Pool Size:</label>
+                            <input type="number" id="ready-pool-input" min="0" max="100" style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <button class="btn btn-primary" id="set-ready-pool">Set</button>
+                        </div>
+                        <p style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                            Set to 0 to disable ready pool. When enabled, the first N guests in the queue are considered "ready" and can be scanned in any order.
+                        </p>
                     </div>
-                    <p style="margin-top: 10px; color: #666; font-size: 0.9rem;" id="mock-guests-help">
-                        Mock guests get unique names (mock0, mock1, mock2...). Use "Reset Counter" to start over from 0.
-                    </p>
-                </div>
 
-                <div class="card">
-                    <div class="card-header">Premium Access</div>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                        <label>
-                            <input type="checkbox" id="premium-access-toggle">
-                            <span>Enable Premium Access</span>
-                        </label>
+                    <div class="card">
+                        <div class="card-header">Premium Access</div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <label>
+                                <input type="checkbox" id="premium-access-toggle">
+                                <span>Enable Premium Access</span>
+                            </label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <label for="premium-limit-input">Premium Limit:</label>
+                            <input type="number" id="premium-limit-input" min="0" max="100" style="width: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <button class="btn btn-primary" id="set-premium-limit-btn">Update Premium Limit</button>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label for="one-shot-price-input">One Shot Price ($):</label>
+                            <input type="number" id="one-shot-price-input" min="0" max="1000" style="width: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <button class="btn btn-primary" id="set-one-shot-price-btn">Update One Shot Price</button>
+                        </div>
+                        <p style="margin-top: 10px; color: #666; font-size: 0.9rem;">
+                            Premium access must be enabled AND premium limit must be >0 for the upgrade button to appear in the guest app.
+                        </p>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                        <label for="premium-limit-input">Premium Limit:</label>
-                        <input type="number" id="premium-limit-input" min="0" max="100" style="width: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <button class="btn btn-primary" id="set-premium-limit-btn">Update Premium Limit</button>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <label for="one-shot-price-input">One Shot Price ($):</label>
-                        <input type="number" id="one-shot-price-input" min="0" max="1000" style="width: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <button class="btn btn-primary" id="set-one-shot-price-btn">Update One Shot Price</button>
-                    </div>
-                    <p style="margin-top: 10px; color: #666; font-size: 0.9rem;">
-                        Premium access must be enabled AND premium limit must be >0 for the upgrade button to appear in the guest app.
-                    </p>
-                </div>
 
-                <div class="card">
-                    <div class="card-header">Venue Management</div>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                        <label>
-                            <input type="checkbox" id="venue-mode-toggle">
-                            <span>Enable Venue Mode</span>
-                        </label>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                        <label for="venue-capacity-input">Venue Capacity:</label>
-                        <input type="number" id="venue-capacity-input" min="0" max="10000" style="width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <button class="btn btn-primary" id="set-venue-capacity-btn">Update Venue Capacity</button>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <button class="btn btn-warning" id="decrement-venue-btn">Remove Guest from Venue</button>
-                        <span style="color: #666; font-size: 0.9rem;">Use this when a guest leaves the venue</span>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">Ready Pool Configuration</div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <label for="ready-pool-input">Ready Pool Size:</label>
-                        <input type="number" id="ready-pool-input" min="0" max="100" style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <button class="btn btn-primary" id="set-ready-pool">Set</button>
-                    </div>
-                    <p style="margin-top: 10px; color: #666; font-size: 0.9rem;">
-                        Set to 0 to disable ready pool. When enabled, the first N guests in the queue are considered "ready" and can be scanned in any order.
-                    </p>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">Daily Operations</div>
-                    <div class="form-group">
-                        <button onclick="dailyReset()" class="btn btn-danger">Daily Reset Queue</button>
-                        <p class="help-text">Clears all guests from queue while preserving configuration. Use at start of business day.</p>
+                    <div class="card">
+                        <div class="card-header">Venue Management</div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <label>
+                                <input type="checkbox" id="venue-mode-toggle">
+                                <span>Enable Venue Mode</span>
+                            </label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <label for="venue-capacity-input">Venue Capacity:</label>
+                            <input type="number" id="venue-capacity-input" min="0" max="10000" style="width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <button class="btn btn-primary" id="set-venue-capacity-btn">Update Venue Capacity</button>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button class="btn btn-warning" id="decrement-venue-btn">Remove Guest from Venue</button>
+                            <span style="color: #666; font-size: 0.9rem;">Use this when a guest leaves the venue</span>
+                        </div>
                     </div>
                 </div>
             </div>

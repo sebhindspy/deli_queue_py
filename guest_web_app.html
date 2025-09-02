@@ -24,7 +24,7 @@
 
         <div class="status">
             <p><strong>The queue is currently </strong> <span id="queueStatus">Loading...</span></p>
-            <p><strong>Your position in the queue is </strong> <span id="position">0</span></p>
+            <p><strong id="positionLabel">There are currently </strong> <span id="position">0</span> <span id="positionSuffix">guests in the queue</span></p>
             <p id="turnMessage"></p>
         </div>
         <div id="qrCodeContainer"></div>
@@ -173,6 +173,15 @@
             statusDiv.querySelector("#turnMessage").textContent = getConfig('text.scannedMessage', 'You have been scanned out of the queue.');
             document.getElementById("qrCodeContainer").innerHTML = "";
             clearInterval(intervalId);
+            
+            // Reset position display to show total queue count
+            const positionLabel = document.getElementById("positionLabel");
+            const positionSuffix = document.getElementById("positionSuffix");
+            positionLabel.textContent = "There are currently ";
+            positionSuffix.textContent = " guests in the queue";
+            
+            // Fetch updated status to show current queue count
+            fetchQueueStatus();
         }
 
         function startPolling(email) {
@@ -248,6 +257,23 @@
                 .then(res => res.json())
                 .then(data => {
                     queueStatusDiv.textContent = ` ${data.is_open ? "Open" : "Closed"}`;
+                    
+                    // Update position display based on whether guest is in queue
+                    const positionLabel = document.getElementById("positionLabel");
+                    const positionSpan = document.getElementById("position");
+                    const positionSuffix = document.getElementById("positionSuffix");
+                    
+                    if (!inQueue) {
+                        // Show total queue count when not in queue
+                        const totalGuests = data.queue ? data.queue.length : 0;
+                        positionLabel.textContent = "There are currently ";
+                        positionSpan.textContent = totalGuests;
+                        positionSuffix.textContent = " guests in the queue";
+                    } else {
+                        // Show individual position when in queue
+                        positionLabel.textContent = "Your position in the queue is ";
+                        positionSuffix.textContent = "";
+                    }
                     
                     // Check if premium access is enabled AND premium limit is >0
                     const premiumAccessEnabled = data.premium_access_enabled && data.premium_limit > 0;

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue System Storybook</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        /* Storybook-specific styles */
+        .storybook-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .storybook-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .storybook-main {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .storybook-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .storybook-nav li {
+            margin: 5px 0;
+        }
+        
+        .storybook-nav a {
+            display: block;
+            padding: 8px 12px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .storybook-nav a:hover {
+            background-color: #e9ecef;
+        }
+        
+        .storybook-nav a.active {
+            background-color: var(--primary-color, #007bff);
+            color: white;
+        }
+        
+        .storybook-content {
+            display: none;
+        }
+        
+        .storybook-content.active {
+            display: block;
+        }
+        
+        .storybook-section {
+            margin-bottom: 40px;
+        }
+        
+        .storybook-section h2 {
+            color: #333;
+            border-bottom: 2px solid var(--primary-color, #007bff);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .storybook-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .storybook-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+        }
+        
+        .storybook-card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .storybook-preview {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+        
+        .storybook-controls {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .storybook-controls label {
+            display: block;
+            margin: 10px 0 5px 0;
+            font-weight: 500;
+        }
+        
+        .storybook-controls input,
+        .storybook-controls select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .color-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="storybook-sidebar">
+        <h1 style="margin-bottom: 20px; color: var(--primary-color, #007bff);">Queue System Storybook</h1>
+        <ul class="storybook-nav">
+            <li><a href="#buttons" class="active">Buttons</a></li>
+            <li><a href="#cards">Cards</a></li>
+            <li><a href="#navigation">Navigation</a></li>
+            <li><a href="#forms">Forms</a></li>
+            <li><a href="#status">Status Indicators</a></li>
+            <li><a href="#layout">Layout Components</a></li>
+            <li><a href="#colors">Color System</a></li>
+        </ul>
+    </div>
+
+    <div class="storybook-main">
+        <!-- Buttons Section -->
+        <div id="buttons" class="storybook-content active">
+            <div class="storybook-section">
+                <h2>Button Components</h2>
+                
+                <div class="storybook-grid">
+                    <div class="storybook-card">
+                        <h3>Primary Buttons</h3>
+                        <div class="storybook-preview">
+                            <button class="btn btn-primary">Primary Button</button>
+                            <button class="btn btn-primary" disabled>Disabled Primary</button>
+                        </div>
+                        <div class="storybook-controls">
+                            <label>Primary Color:</label>
+                            <input type="color" id="primary-color" value="#007bff" onchange="updatePrimaryColor(this.value)">
+                        </div>
+                    </div>
+
+                    <div class="storybook-card">
+                        <h3>Secondary Buttons</h3>
+                        <div class="storybook-preview">
+                            <button class="btn btn-secondary">Secondary Button</button>
+                            <button class="btn btn-secondary" disabled>Disabled Secondary</button>
+                        </div>
+                        <div class="storybook-controls">
+                            <label>Secondary Color:</label>
+                            <input type="color" id="secondary-color" value="#6c757d" onchange="updateSecondaryColor(this.value)">
+                        </div>
+                    </div>
+
+                    <div class="storybook-card">
+                        <h3>Action Buttons</h3>
+                        <div class="storybook-preview">
+                            <button class="btn btn-success">Success</button>
+                            <button class="btn btn-danger">Danger</button>
+                            <button class="btn btn-warning">Warning</button>
+                            <button class="btn btn-info">Info</button>
+                        </div>
+                    </div>
+
+                    <div class="storybook-card">
+                        <h3>Button Sizes</h3>
+                        <div class="storybook-preview">
+                            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;">Small</button>
+                            <button class="btn btn-primary">Normal</button>
+                            <button class="btn btn-primary" style="padding: 12px 24px; font-size: 18px;">Large</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards Section -->
+        <div id="cards" class="storybook-content">
+            <div class="storybook-section">
+                <h2>Card Components</h2>
+                
+                <div class="storybook-grid">
+                    <div class="storybook-card">
+                        <h3>Status Card</h3>
+                        <div class="storybook-preview">
+                            <div class="card">
+                                <div class="card-header">Queue Status</div>
+                                <div class="status-grid">
+                                    <div class="status-item">
+                                        <div class="status-value">Open</div>
+                                        <div class="status-label">Queue Status</div>
+                                    </div>
+                                    <div class="status-item">
+                                        <div class="status-value">15</div>
+                                        <div class="status-label">Guests in Queue</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="storybook-card">
+                        <h3>Control Card</h3>
+                        <div class="storybook-preview">
+                            <div class="card">
+                                <div class="card-header">Queue Controls</div>
+                                <div class="queue-controls">
+                                    <button class="btn btn-success">Open Queue</button>
+                                    <button class="btn btn-danger">Close Queue</button>
+                                    <button class="btn btn-warning">Reset Queue</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="storybook-card">
+                        <h3>Link Card</h3>
+                        <div class="storybook-preview">
+                            <div class="link-card">
+                                <h3>Guest App</h3>
+                                <div class="qr-code">QR Code Placeholder</div>
+                                <div class="link-url">https://example.com/guest</div>
+                                <button class="btn btn-primary">Open Guest App</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Section -->
+        <div id="navigation" class="storybook-content">
+            <div class="storybook-section">
+                <h2>Navigation Components</h2>
+                
+                <div class="storybook-grid">
+                    <div class="storybook-card">
+                        <h3>Sidebar Navigation</h3>
+                        <div class="storybook-preview">
+                            <div class="sidebar" style="position: relative; width: 100%; height: 300px;">
+                                <div class="sidebar-header">
+                                    <h1>Queue Control</h1>
+                                </div>
+                                <ul class="sidebar-nav">
+                                    <li><a href="#" class="nav-link active">🏠 Home</a></li>
+                                    <li><a href="#" class="nav-link">📋 Queues</a></li>
+                                    <li><a href="#" class="nav-link">🔗 Links</a></li>
+                                    <li><a href="#" class="nav-link">⚙️ Config</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forms Section -->
+        <div id="forms" class="storybook-content">
+            <div class="storybook-section">
+                <h2>Form Components</h2>
+                
+                <div class="storybook-grid">
+                    <div class="storybook-card">
+                        <h3>Input Fields</h3>
+                        <div class="storybook-preview">
+                            <input type="email" placeholder="Enter your email" style="width: 100%; margin-bottom: 10px;">
+                            <input type="number" placeholder="Number of guests" style="width: 100%; margin-bottom: 10px;">
+                            <input type="text" placeholder="Customer name" style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <div class="storybook-card">
+                        <h3>Select Dropdowns</h3>
+                        <div class="storybook-preview">
+                            <select style="width: 100%; margin-bottom: 10px;">
+                                <option>Default Configuration</option>
+                                <option>Customer A Config</option>
+                                <option>Customer B Config</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="storybook-card">
+                        <h3>Checkboxes</h3>
+                        <div class="storybook-preview">
+                            <label style="display: block; margin-bottom: 10px;">
+                                <input type="checkbox"> Enable Premium Access
+                            </label>
+                            <label style="display: block; margin-bottom: 10px;">
+                                <input type="checkbox"> Enable Venue Mode
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Indicators Section -->
+        <div id="status" class="storybook-content">
+            <div class="storybook-section">
+                <h2>Status Indicators</h2>
+                
+                <div class="storybook-grid">
+                    <div class="storybook-card">
+                        <h3>Queue Status</h3>
+                        <div class="storybook-preview">
+                            <div style="display: flex; gap: 20px; align-items: center;">
+                                <div class="status-item">
+                                    <div class="status-value" style="color: #28a745;">Open</div>
+                                    <div class="status-label">Queue Status</div>
+                                </div>
+                                <div class="status-item">
+                                    <div class="status-value" style="color: #dc3545;">Closed</div>
+                                    <div class="status-label">Queue Status</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="storybook-card">
+                        <h3>Venue Status</h3>
+                        <div class="storybook-preview">
+                            <div style="display: flex; gap: 20px; align-items: center;">
+                                <div class="status-item">
+                                    <div class="status-value" style="color: #28a745;">Available</div>
+                                    <div class="status-label">Venue Status</div>
+                                </div>
+                                <div class="status-item">
+                                    <div class="status-value" style="color: #dc3545;">Full</div>
+                                    <div class="status-label">Venue Status</div>
+                                </div>
+                                <div class="status-item">
+                                    <div class="status-value" style="color: #6c757d;">Disabled</div>
+                                    <div class="status-label">Venue Status</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Layout Components Section -->
+        <div id="layout" class="storybook-content">
+            <div class="storybook-section">
+                <h2>Layout Components</h2>
+                
+                <div class="storybook-grid">
+                    <div class="storybook-card">
+                        <h3>Grid Layout</h3>
+                        <div class="storybook-preview">
+                            <div class="status-grid">
+                                <div class="status-item">
+                                    <div class="status-value">15</div>
+                                    <div class="status-label">Guests in Queue</div>
+                                </div>
+                                <div class="status-item">
+                                    <div class="status-value">3</div>
+                                    <div class="status-label">Ready Pool</div>
+                                </div>
+                                <div class="status-item">
+                                    <div class="status-value">25</div>
+                                    <div class="status-label">Venue Capacity</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="storybook-card">
+                        <h3>Container Layout</h3>
+                        <div class="storybook-preview">
+                            <div class="container" style="border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+                                <h2>Container Example</h2>
+                                <p>This is a container with proper spacing and responsive behavior.</p>
+                                <button class="btn btn-primary">Action Button</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color System Section -->
+        <div id="colors" class="storybook-content">
+            <div class="storybook-section">
+                <h2>Color System</h2>
+                
+                <div class="storybook-grid">
+                    <div class="storybook-card">
+                        <h3>Primary Colors</h3>
+                        <div class="storybook-preview">
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                <div class="color-preview" style="background-color: var(--primary-color, #007bff);"></div>
+                                <span>Primary: var(--primary-color)</span>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                <div class="color-preview" style="background-color: var(--primary-hover, #0056b3);"></div>
+                                <span>Primary Hover: var(--primary-hover)</span>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <div class="color-preview" style="background-color: var(--primary-dark, #0056b3);"></div>
+                                <span>Primary Dark: var(--primary-dark)</span>
+                            </div>
+                        </div>
+                        <div class="storybook-controls">
+                            <label>Primary Color:</label>
+                            <input type="color" id="primary-color-system" value="#007bff" onchange="updatePrimaryColor(this.value)">
+                        </div>
+                    </div>
+
+                    <div class="storybook-card">
+                        <h3>Secondary Colors</h3>
+                        <div class="storybook-preview">
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                <div class="color-preview" style="background-color: var(--secondary-color, #6c757d);"></div>
+                                <span>Secondary: var(--secondary-color)</span>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                <div class="color-preview" style="background-color: var(--secondary-hover, #545b62);"></div>
+                                <span>Secondary Hover: var(--secondary-hover)</span>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <div class="color-preview" style="background-color: var(--secondary-dark, #545b62);"></div>
+                                <span>Secondary Dark: var(--secondary-dark)</span>
+                            </div>
+                        </div>
+                        <div class="storybook-controls">
+                            <label>Secondary Color:</label>
+                            <input type="color" id="secondary-color-system" value="#6c757d" onchange="updateSecondaryColor(this.value)">
+                        </div>
+                    </div>
+
+                    <div class="storybook-card">
+                        <h3>Semantic Colors</h3>
+                        <div class="storybook-preview">
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                <div class="color-preview" style="background-color: var(--success-color, #28a745);"></div>
+                                <span>Success: var(--success-color)</span>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                <div class="color-preview" style="background-color: var(--danger-color, #dc3545);"></div>
+                                <span>Danger: var(--danger-color)</span>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                <div class="color-preview" style="background-color: var(--warning-color, #ffc107);"></div>
+                                <span>Warning: var(--warning-color)</span>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <div class="color-preview" style="background-color: var(--info-color, #17a2b8);"></div>
+                                <span>Info: var(--info-color)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functionality
+        document.querySelectorAll('.storybook-nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links and content
+                document.querySelectorAll('.storybook-nav a').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.storybook-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Show corresponding content
+                const targetId = this.getAttribute('href').substring(1);
+                document.getElementById(targetId).classList.add('active');
+            });
+        });
+
+        // Color update functions
+        function updatePrimaryColor(color) {
+            document.documentElement.style.setProperty('--primary-color', color);
+            document.documentElement.style.setProperty('--primary-hover', adjustBrightness(color, -20));
+            document.documentElement.style.setProperty('--primary-dark', adjustBrightness(color, -20));
+            
+            // Update all color inputs
+            document.querySelectorAll('#primary-color, #primary-color-system').forEach(input => {
+                input.value = color;
+            });
+        }
+
+        function updateSecondaryColor(color) {
+            document.documentElement.style.setProperty('--secondary-color', color);
+            document.documentElement.style.setProperty('--secondary-hover', adjustBrightness(color, -20));
+            document.documentElement.style.setProperty('--secondary-dark', adjustBrightness(color, -20));
+            
+            // Update all color inputs
+            document.querySelectorAll('#secondary-color, #secondary-color-system').forEach(input => {
+                input.value = color;
+            });
+        }
+
+        // Helper function to adjust color brightness
+        function adjustBrightness(hex, percent) {
+            const num = parseInt(hex.replace("#", ""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+        }
+
+        // Initialize with current CSS variables
+        document.addEventListener('DOMContentLoaded', function() {
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+            const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim();
+            
+            if (primaryColor) {
+                document.querySelectorAll('#primary-color, #primary-color-system').forEach(input => {
+                    input.value = primaryColor;
+                });
+            }
+            
+            if (secondaryColor) {
+                document.querySelectorAll('#secondary-color, #secondary-color-system').forEach(input => {
+                    input.value = secondaryColor;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

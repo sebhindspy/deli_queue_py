@@ -64,6 +64,7 @@ jobs:
           cp status_dashboard.html dist/
           cp site_config_cms.html dist/
           cp unified_control_app.html dist/
+          cp storybook.html dist/
           echo "window.API_BASE='${{ steps.get_api.outputs.API_URL }}'" > dist/static/config.js
           # Copy site config (can be customized per customer)
           cp static/site_config.js dist/static/

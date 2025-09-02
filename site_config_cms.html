@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="static/style.css">
     <script src="static/config.js"></script>
     <script src="static/site_config.js"></script>
+    <script src="static/shared_config.js"></script>
     <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
@@ -32,7 +33,7 @@
                     <option value="default">Default Configuration</option>
                 </select>
                 <button onclick="applyConfig()">Apply Selected Config</button>
-                <button onclick="refreshComponents()">Refresh Components</button>
+        
                 <!-- <button onclick="resetToDefault()">Reset to Default</button> -->
             </div>
         </div>
@@ -405,12 +406,15 @@ window.getConfig = function(path, defaultValue = '') {
                             const customerConfig = JSON.parse(configMatch[1]);
                             console.log('Parsed customer config:', customerConfig);
                             
-                            window.SITE_CONFIG = customerConfig;
-                            console.log('Updated window.SITE_CONFIG:', window.SITE_CONFIG);
-                            
-                            // Update CSS variables to reflect the new configuration
-                            updateCSSVariables(customerConfig);
-                            console.log('CSS variables updated');
+                                                         window.SITE_CONFIG = customerConfig;
+                             console.log('Updated window.SITE_CONFIG:', window.SITE_CONFIG);
+                             
+                             // Store the configuration in localStorage for other pages
+                             localStorage.setItem('currentSiteConfig', JSON.stringify(customerConfig));
+                             
+                             // Update CSS variables to reflect the new configuration
+                             updateCSSVariables(customerConfig);
+                             console.log('CSS variables updated');
                             
                             showStatus(`Configuration ${selectedConfig} applied successfully`, 'success');
 
@@ -434,74 +438,43 @@ window.getConfig = function(path, defaultValue = '') {
             }
         }
 
-        // Force refresh of components to apply new styles
-        function refreshComponents() {
-            console.log('refreshComponents function called');
-            
-            // Refresh any iframes
-            const iframes = document.querySelectorAll('iframe');
-            console.log('Found iframes:', iframes.length);
-            iframes.forEach(iframe => {
-                if (iframe.src) {
-                    iframe.src = iframe.src;
-                }
-            });
-            
-            // Force a repaint of the current page
-            document.body.style.display = 'none';
-            document.body.offsetHeight; // Trigger reflow
-            document.body.style.display = '';
-            
-            console.log('Components refresh completed');
-            showStatus('Components refreshed to apply new styles', 'info');
-        }
+
 
         // Update CSS variables based on configuration
         function updateCSSVariables(config) {
-            const root = document.documentElement;
-            
-            // Update primary colors
-            if (config.colors && config.colors.primary) {
-                root.style.setProperty('--primary-color', config.colors.primary);
-                root.style.setProperty('--primary-hover', config.colors.primaryHover || config.colors.primary);
-                root.style.setProperty('--primary-dark', config.colors.primaryDark || config.colors.primary);
-                root.style.setProperty('--primary-text', config.colors.primaryText || '#ffffff');
+            // Update CSS variables on current page
+            if (window.SharedConfig && window.SharedConfig.updateCSSVariables) {
+                window.SharedConfig.updateCSSVariables(config);
+            } else {
+                // Fallback: manual CSS variable update
+                const root = document.documentElement;
+                if (config.colors) {
+                    Object.entries(config.colors).forEach(([key, value]) => {
+                        if (value) {
+                            root.style.setProperty(`--${key}-color`, value);
+                        }
+                    });
+                }
             }
             
-            // Update secondary colors
-            if (config.colors && config.colors.secondary) {
-                root.style.setProperty('--secondary-color', config.colors.secondary);
-                root.style.setProperty('--secondary-hover', config.colors.secondaryHover || config.colors.secondary);
-                root.style.setProperty('--secondary-dark', config.colors.secondaryDark || config.colors.secondary);
-                root.style.setProperty('--secondary-text', config.colors.secondaryText || '#ffffff');
-            }
+            // Store configuration in localStorage for other pages
+            localStorage.setItem('currentSiteConfig', JSON.stringify(config));
             
-            // Update success colors
-            if (config.colors && config.colors.success) {
-                root.style.setProperty('--success-color', config.colors.success);
-                root.style.setProperty('--success-hover', config.colors.successHover || config.colors.success);
-                root.style.setProperty('--success-dark', config.colors.successDark || config.colors.success);
-            }
+            // Dispatch custom event for other components
+            window.dispatchEvent(new CustomEvent('configChanged', {
+                detail: { config: config }
+            }));
             
-            // Update danger colors
-            if (config.colors && config.colors.danger) {
-                root.style.setProperty('--danger-color', config.colors.danger);
-                root.style.setProperty('--danger-hover', config.colors.dangerHover || config.colors.danger);
-                root.style.setProperty('--danger-dark', config.colors.dangerDark || config.colors.danger);
-            }
-            
-            // Update warning colors
-            if (config.colors && config.colors.warning) {
-                root.style.setProperty('--warning-color', config.colors.warning);
-                root.style.setProperty('--warning-hover', config.colors.warningHover || config.colors.warning);
-                root.style.setProperty('--warning-dark', config.colors.warningDark || config.colors.warning);
-            }
-            
-            // Update info colors
-            if (config.colors && config.colors.info) {
-                root.style.setProperty('--info-color', config.colors.info);
-                root.style.setProperty('--info-hover', config.colors.infoHover || config.colors.info);
-                root.style.setProperty('--info-dark', config.colors.infoDark || config.colors.info);
+            // Communicate with parent window if in iframe
+            if (window.parent && window.parent !== window) {
+                try {
+                    window.parent.postMessage({
+                        type: 'configChanged',
+                        config: config
+                    }, '*');
+                } catch (error) {
+                    console.log('Could not communicate with parent window:', error);
+                }
             }
         }
 

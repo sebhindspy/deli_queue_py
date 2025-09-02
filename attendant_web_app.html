@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="static/style.css">
     <script src="static/config.js"></script>
     <script src="static/site_config.js"></script>
+    <script src="static/shared_config.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 
 </head>
@@ -42,6 +43,8 @@
     <script>
         const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
         const api = (path) => `${API_BASE}${path}`;
+
+
 
         async function fetchStatus() {
             try {

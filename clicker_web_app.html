@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="static/style.css">
     <script src="static/config.js"></script>
     <script src="static/site_config.js"></script>
+    <script src="static/shared_config.js"></script>
 </head>
 <body>
     <div class="container">
@@ -24,6 +25,8 @@
     <script>
         const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
         const api = (path) => `${API_BASE}${path}`;
+
+
 
         // Helper function to get configuration values
         function getConfig(key, defaultValue = '') {

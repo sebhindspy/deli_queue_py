@@ -211,7 +211,51 @@
     <!-- Scripts -->
     <script src="static/config.js"></script>
     <script src="static/site_config.js"></script>
+    <script src="static/shared_config.js"></script>
     <script>
+        // Listen for messages from CMS iframe
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'configChanged') {
+                handleConfigChange(event.data.config);
+            }
+        });
+        
+        // Handle configuration changes from CMS
+        function handleConfigChange(config) {
+            console.log('Configuration changed, updating CSS variables...');
+            
+            // Update CSS variables globally
+            if (window.SharedConfig && window.SharedConfig.updateCSSVariables) {
+                window.SharedConfig.updateCSSVariables(config);
+            } else {
+                // Fallback: manual CSS variable update
+                updateCSSVariablesFallback(config);
+            }
+            
+            // Store configuration for other components
+            localStorage.setItem('currentSiteConfig', JSON.stringify(config));
+            
+            // Dispatch custom event for other components
+            window.dispatchEvent(new CustomEvent('configChanged', {
+                detail: { config: config }
+            }));
+            
+            console.log('Configuration applied globally');
+        }
+        
+        // Fallback CSS variable update function
+        function updateCSSVariablesFallback(config) {
+            const root = document.documentElement;
+            
+            if (config.colors) {
+                Object.entries(config.colors).forEach(([key, value]) => {
+                    if (value) {
+                        root.style.setProperty(`--${key}-color`, value);
+                    }
+                });
+            }
+        }
+        
         // Navigation functionality
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', function(e) {

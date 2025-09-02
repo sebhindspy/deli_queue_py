@@ -9,13 +9,14 @@
     <link rel="stylesheet" href="static/style.css">
     <script src="static/config.js"></script>
     <script src="static/site_config.js"></script>
+    <script src="static/shared_config.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
     <div class="container">
 
-        <img src="" id="brandLogo" style="max-width: 100%; height: auto; border-radius: 16px;">
+        <img src="" id="brandLogo" style="max-width: 100%; height: auto; border-radius: 16px; margin-bottom: 16px;">
 
         <h1 id="pageTitle">Join the Queue!</h1>
 
@@ -39,6 +40,8 @@
         let inQueue = false;
         let intervalId = null;
         let premiumPurchased = false;
+        
+
 
         const emailInput = document.getElementById("email");
         const actionBtn = document.getElementById("actionBtn");

@@ -21,26 +21,26 @@
             <p><strong id="premiumLimitLabel">Premium limit:</strong> <span id="premiumLimit">Loading...</span></p>
             <p><strong id="oneShotPriceLabel">One Shot price:</strong> $<span id="oneShotPrice">Loading...</span></p>
         </div>
-        <button onclick="openQueue()">Open Queue</button>
-        <button onclick="closeQueue()">Close Queue</button>
-        <button onclick="resetQueue()">Reset Queue</button>
+        <button class="btn btn-success" onclick="openQueue()">Open Queue</button>
+        <button class="btn btn-danger" onclick="closeQueue()">Close Queue</button>
+        <button class="btn btn-warning" onclick="resetQueue()">Reset Queue</button>
 
         <hr>
 
         <h3 id="demoModeLabel">Demo mode</h3>
 
         <input type="number" id="mockCount" placeholder="Number of mock guests">
-        <button onclick="mockGuests()">Insert Mock Guests</button>
+        <button class="btn btn-primary" onclick="mockGuests()">Insert Mock Guests</button>
 
         <hr>
 
         <h3 id="premiumAccessLabel">Premium access</h3>
 
         <input type="number" id="premiumLimitInput" placeholder="Set Premium Limit">
-        <button onclick="setPremiumLimit()">Update Premium Limit</button>
+        <button class="btn btn-primary" onclick="setPremiumLimit()">Update Premium Limit</button>
 
         <input type="number" id="oneShotPriceInput" placeholder="Set One Shot Price ($)">
-        <button onclick="setOneShotPrice()">Update One Shot Price</button>
+        <button class="btn btn-primary" onclick="setOneShotPrice()">Update One Shot Price</button>
 
         <hr>
 
@@ -54,20 +54,20 @@
         <br><br>
 
         <input type="number" id="venueCapacityInput" placeholder="Set Venue Capacity">
-        <button onclick="setVenueCapacity()">Update Venue Capacity</button>
+        <button class="btn btn-primary" onclick="setVenueCapacity()">Update Venue Capacity</button>
 
         <hr>
 
         <h3 id="readyPoolLabel">Ready pool</h3>
         <p><strong id="currentReadyPoolLabel">Current ready pool:</strong> <span id="readyPoolLimit">Disabled</span></p>
         <input type="number" id="readyPoolLimitInput" placeholder="Set Ready Pool Size (0 to disable)">
-        <button onclick="setReadyPoolLimit()">Update Ready Pool</button>
+        <button class="btn btn-primary" onclick="setReadyPoolLimit()">Update Ready Pool</button>
 
         <hr>
 
         <h3 id="siteConfigurationLabel">Site Configuration</h3>
         <p>Customize branding, colors, and text for different customers.</p>
-        <button onclick="openSiteConfigCMS()" id="openCMSBtn">Open Configuration CMS</button>
+        <button class="btn btn-primary" onclick="openSiteConfigCMS()" id="openCMSBtn">Open Configuration CMS</button>
 
     </div>
 

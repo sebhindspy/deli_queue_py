@@ -24,7 +24,7 @@
             <div class="control-group">
                 <label>Customer Name:</label>
                 <input type="text" id="customerName" placeholder="Enter customer name" value="default">
-                <button onclick="saveConfig()">Save Configuration</button>
+                <button class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
             </div>
             
             <div class="control-group">
@@ -32,7 +32,7 @@
                 <select id="configSelector" onchange="loadSelectedConfig()">
                     <option value="default">Default Configuration</option>
                 </select>
-                <button onclick="applyConfig()">Apply Selected Config</button>
+                <button class="btn btn-secondary" onclick="applyConfig()">Apply Selected Config</button>
         
                 <!-- <button onclick="resetToDefault()">Reset to Default</button> -->
             </div>
@@ -156,7 +156,7 @@
                                        onchange="updateConfigValue('${currentPath}', this.value)">
                             </td>
                             <td>
-                                <button class="update-btn" onclick="updateConfigValue('${currentPath}', this.parentElement.previousElementSibling.querySelector('.input-field').value)">
+                                <button class="btn btn-primary update-btn" onclick="updateConfigValue('${currentPath}', this.parentElement.previousElementSibling.querySelector('.input-field').value)">
                                     Update
                                 </button>
                             </td>
